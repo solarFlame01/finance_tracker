@@ -6,6 +6,10 @@ import os
 from datetime import datetime
 import plotly.graph_objects as go
 
+from config import DATA_FILE, ETF_DETAILS_FILE, INTERMEDIARI
+from data_manager import load_etf_data, save_etf_data, load_etf_details, save_etf_details
+from metrics import calculate_metrics
+
 # Configurazione pagina
 st.set_page_config(
     page_title="ETF Portfolio Tracker",
@@ -14,61 +18,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"  # Nasconde la sidebar di default
 )
 
-# Percorsi file
-DATA_FILE = "etf_data.json"
-ETF_DETAILS_FILE = "etf_details.csv"
-
 # Inizializzazione session state
 if 'etf_data' not in st.session_state:
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
-            st.session_state.etf_data = json.load(f)
-    else:
-        st.session_state.etf_data = []
+    st.session_state.etf_data = load_etf_data()
 
 if 'etf_details' not in st.session_state:
-    if os.path.exists(ETF_DETAILS_FILE):
-        st.session_state.etf_details = pd.read_csv(ETF_DETAILS_FILE)
-    else:
-        st.session_state.etf_details = pd.DataFrame()
-
-# Intermediari predefiniti
-INTERMEDIARI = ["Directa", "Fineco", "Degiro", "IBKR", "Altro"]
-
-# Funzione per salvare i dati
-def save_data():
-    with open(DATA_FILE, 'w') as f:
-        json.dump(st.session_state.etf_data, f, indent=2)
-
-# Funzione per calcolare le metriche
-def calculate_metrics(transactions):
-    if not transactions:
-        return pd.DataFrame()
-    
-    df = pd.DataFrame(transactions)
-    
-    # Assicuriamoci che le colonne necessarie esistano
-    required_cols = ['Quantità', 'Prezzo di acquisto', 'Prezzo corrente']
-    for col in required_cols:
-        if col not in df.columns:
-            df[col] = 0
-    
-    # Calcoli
-    df['Costo'] = df['Quantità'] * df['Prezzo di acquisto']
-    df['Market Value'] = df['Quantità'] * df['Prezzo corrente']
-    df['Crescita %'] = ((df['Market Value'] - df['Costo']) / df['Costo'] * 100).round(2)
-    
-    # Formattazione
-    if 'Data acquisto' in df.columns:
-        df['Data acquisto'] = pd.to_datetime(df['Data acquisto'], errors='coerce').dt.strftime('%d/%m/%Y')
-    
-    numeric_cols = ['Prezzo di acquisto', 'Prezzo corrente', 'Costo', 'Market Value']
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = df[col].round(2)
-    
-    return df
-
+    st.session_state.etf_details = load_etf_details()    
 # Sezione Dashboard
 def render_dashboard():
     st.header("📊 Dashboard")
@@ -190,7 +145,7 @@ def render_gestione_etf():
                 }
                 
                 st.session_state.etf_data.append(nuova_transazione)
-                save_data()
+                save_etf_data(st.session_state.etf_data)
                 st.success("✅ Transazione salvata con successo!")
     
     # Visualizza e gestisci transazioni esistenti
@@ -230,7 +185,7 @@ def render_gestione_etf():
                     for idx in sorted(indici_da_eliminare, reverse=True):
                         st.session_state.etf_data.pop(idx)
                     
-                    save_data()
+                    save_etf_data(st.session_state.etf_data)
                     st.success(f"✅ {len(indici_da_eliminare)} transazioni eliminate!")
                     st.rerun()
     else:
@@ -478,7 +433,7 @@ def render_impostazioni():
                     
                     if st.button("Ripristina da Backup", type="secondary"):
                         st.session_state.etf_data = data
-                        save_data()
+                        save_etf_data(st.session_state.etf_data)
                         st.success("✅ Dati ripristinati con successo!")
                         st.rerun()
                 except Exception as e:
@@ -503,7 +458,7 @@ def render_impostazioni():
                     if not t.get('Transazione prova', False)
                 ]
                 new_len = len(st.session_state.etf_data)
-                save_data()
+                save_etf_data(st.session_state.etf_data)
                 st.success(f"✅ Rimosse {original_len - new_len} transazioni di test")
                 st.rerun()
         
