@@ -2,6 +2,7 @@ import os
 from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
+import logging
 
 # Carica le variabili dal file .env
 load_dotenv() 
@@ -60,15 +61,13 @@ def insert_holdings(etf_ticker, holdings):
             "nome": row.get("Nome"),
             "settore": row.get("Settore"),
             "asset_class": row.get("Asset Class"),
-            "valore_mercato": row.get("Valore di mercato"),
-            "ponderazione": row.get("Ponderazione (%)"),
-            "valore_nozionale": row.get("Valore nozionale"),
-            "nominale": row.get("Nominale"),
-            "prezzo": row.get("Prezzo"),
+            "ponderazione": row.get("Ponderazione (%)").replace(",","."),
             "area_geografica": row.get("Area Geografica"),
             "cambio": row.get("Cambio"),
             "valuta_mercato": row.get("Valuta di mercato")
         }
+        logger = logging.getLogger(__name__)
+        logger.debug("Inserting ETF holding", extra={"etf_ticker": etf_ticker, "data": data})
         res = supabase.table("etf_holdings").insert(data).execute()
         results.append(res)
     return results

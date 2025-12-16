@@ -51,9 +51,12 @@ def render_impostazioni():
         
         if uploaded_etf_details is not None:
             try:
-                df_details = pd.read_csv(uploaded_etf_details)
+                from database import insert_holdings  # Importa la funzione dal modulo database
+                
+                df_details = pd.read_csv(uploaded_etf_details, sep=';')
                 st.session_state.etf_details = df_details
-                df_details.to_csv(ETF_DETAILS_FILE, index=False)
+                insert_holdings("TEST_ETF", df_details.to_dict('records'))  # Esempio di inserimento nel DB
+                
                 st.success(f"✅ File caricato: {uploaded_etf_details.name}")
                 st.write("**Anteprima dati:**")
                 st.dataframe(df_details.head(), width='stretch')
