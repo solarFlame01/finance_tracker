@@ -55,7 +55,9 @@ def render_impostazioni():
                 
                 df_details = pd.read_csv(uploaded_etf_details, sep=';')
                 st.session_state.etf_details = df_details
-                insert_holdings("TEST_ETF", df_details.to_dict('records'))  # Esempio di inserimento nel DB
+                
+                etf_name = uploaded_etf_details.name.split('.')[0] # Nome etf preso dal nome del file
+                insert_holdings(etf_name, df_details.to_dict('records'))  # Esempio di inserimento nel DB
                 
                 st.success(f"✅ File caricato: {uploaded_etf_details.name}")
                 st.write("**Anteprima dati:**")
