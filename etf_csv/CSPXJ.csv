@@ -1,109 +1,113 @@
-﻿Ticker;Nome;Settore;Asset Class;Valore di mercato;Ponderazione (%);Valore nozionale;Nominale;Prezzo;Area Geografica;Cambio;Valuta di mercato
-CSPXJ;COMMONWEALTH BANK OF AUSTRALIA;Finanziari;Azionario;273.824.668,07;9,64;273.824.668,07;2.667.092,00;102,67;Australia;Asx - All Markets;AUD
-CSPXJ;BHP GROUP LTD;Materiali;Azionario;187.946.865,84;6,61;187.946.865,84;8.091.805,00;23,23;Australia;Asx - All Markets;AUD
-CSPXJ;AIA GROUP LTD;Finanziari;Azionario;120.444.544,88;4,24;120.444.544,88;17.237.224,00;6,99;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;CSL LTD;Salute;Azionario;117.618.867,87;4,14;117.618.867,87;771.807,00;152,39;Australia;Asx - All Markets;AUD
-CSPXJ;WESTPAC BANKING CORPORATION CORP;Finanziari;Azionario;108.510.003,21;3,82;108.510.003,21;5.471.128,00;19,83;Australia;Asx - All Markets;AUD
-CSPXJ;NATIONAL AUSTRALIA BANK LTD;Finanziari;Azionario;106.046.592,54;3,73;106.046.592,54;4.900.165,00;21,64;Australia;Asx - All Markets;AUD
-CSPXJ;DBS GROUP HOLDINGS LTD;Finanziari;Azionario;98.886.731,48;3,48;98.886.731,48;3.178.035,00;31,12;Singapore;Singapore Exchange;SGD
-CSPXJ;WESFARMERS LTD;Consumi Discrezionali;Azionario;85.860.551,78;3,02;85.860.551,78;1.809.857,00;47,44;Australia;Asx - All Markets;AUD
-CSPXJ;ANZ GROUP HOLDINGS LTD;Finanziari;Azionario;84.713.146,87;2,98;84.713.146,87;4.745.019,00;17,85;Australia;Asx - All Markets;AUD
-CSPXJ;HONG KONG EXCHANGES AND CLEARING L;Finanziari;Azionario;80.274.275,15;2,82;80.274.275,15;1.880.632,00;42,68;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SEA ADS REPRESENTING LTD CLASS A;Comunicazione;Azionario;70.726.078,26;2,49;70.726.078,26;584.658,00;120,97;Singapore;New York Stock Exchange Inc.;USD
-CSPXJ;MACQUARIE GROUP LTD DEF;Finanziari;Azionario;66.343.068,68;2,33;66.343.068,68;579.459,00;114,49;Australia;Asx - All Markets;AUD
-CSPXJ;OVERSEA-CHINESE BANKING LTD;Finanziari;Azionario;65.736.242,33;2,31;65.736.242,33;5.397.941,00;12,18;Singapore;Singapore Exchange;SGD
-CSPXJ;GOODMAN GROUP UNITS;Immobili;Azionario;57.999.311,75;2,04;57.999.311,75;3.237.158,00;17,92;Australia;Asx - All Markets;AUD
-CSPXJ;UNITED OVERSEAS BANK LTD;Finanziari;Azionario;53.441.656,15;1,88;53.441.656,15;2.015.119,00;26,52;Singapore;Singapore Exchange;SGD
-CSPXJ;TRANSURBAN GROUP STAPLED UNITS;Industriali;Azionario;43.469.764,36;1,53;43.469.764,36;4.925.941,00;8,82;Australia;Asx - All Markets;AUD
-CSPXJ;RIO TINTO LTD;Materiali;Azionario;42.139.096,52;1,48;42.139.096,52;593.362,00;71,02;Australia;Asx - All Markets;AUD
-CSPXJ;WOOLWORTHS GROUP LTD;Generi di largo consumo;Azionario;39.183.620,20;1,38;39.183.620,20;1.951.228,00;20,08;Australia;Asx - All Markets;AUD
-CSPXJ;WOODSIDE ENERGY GROUP LTD;Energia;Azionario;38.703.742,57;1,36;38.703.742,57;3.028.801,00;12,78;Australia;Asx - All Markets;AUD
-CSPXJ;ARISTOCRAT LEISURE LTD;Consumi Discrezionali;Azionario;35.852.046,37;1,26;35.852.046,37;901.668,00;39,76;Australia;Asx - All Markets;AUD
-CSPXJ;SINGAPORE TELECOMMUNICATIONS LTD;Comunicazione;Azionario;33.969.430,16;1,20;33.969.430,16;11.886.583,00;2,86;Singapore;Singapore Exchange;SGD
-CSPXJ;QBE INSURANCE GROUP LTD;Finanziari;Azionario;32.660.478,77;1,15;32.660.478,77;2.406.027,00;13,57;Australia;Asx - All Markets;AUD
-CSPXJ;BRAMBLES LTD;Industriali;Azionario;28.937.409,08;1,02;28.937.409,08;2.205.194,00;13,12;Australia;Asx - All Markets;AUD
-CSPXJ;COLES GROUP LTD;Generi di largo consumo;Azionario;28.812.469,44;1,01;28.812.469,44;2.127.542,00;13,54;Australia;Asx - All Markets;AUD
-CSPXJ;FORTESCUE LTD;Materiali;Azionario;26.045.543,35;0,92;26.045.543,35;2.710.874,00;9,61;Australia;Asx - All Markets;AUD
-CSPXJ;NORTHERN STAR RESOURCES LTD;Materiali;Azionario;25.863.498,75;0,91;25.863.498,75;1.817.502,00;14,23;Australia;Asx - All Markets;AUD
-CSPXJ;CK HUTCHISON HOLDINGS LTD;Industriali;Azionario;23.314.494,61;0,82;23.314.494,61;4.294.458,00;5,43;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;XERO LTD;IT;Azionario;23.022.688,90;0,81;23.022.688,90;233.121,00;98,76;Australia;Asx - All Markets;AUD
-CSPXJ;BOC HONG KONG HOLDINGS LTD;Finanziari;Azionario;22.349.374,99;0,79;22.349.374,99;5.932.250,00;3,77;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;CLP HOLDINGS LTD;Imprese di servizi di pubblica utilità;Azionario;21.942.226,20;0,77;21.942.226,20;2.631.000,00;8,34;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;TECHTRONIC INDUSTRIES LTD;Industriali;Azionario;21.535.043,60;0,76;21.535.043,60;2.198.500,00;9,80;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SUNCORP GROUP LTD;Finanziari;Azionario;21.328.878,81;0,75;21.328.878,81;1.738.407,00;12,27;Australia;Asx - All Markets;AUD
-CSPXJ;SUN HUNG KAI PROPERTIES LTD;Immobili;Azionario;21.184.743,57;0,75;21.184.743,57;2.319.834,00;9,13;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;COMPUTERSHARE LTD;Industriali;Azionario;20.577.564,28;0,72;20.577.564,28;846.271,00;24,32;Australia;Asx - All Markets;AUD
-CSPXJ;INSURANCE AUSTRALIA GROUP LTD;Finanziari;Azionario;18.965.989,42;0,67;18.965.989,42;3.765.860,00;5,04;Australia;Asx - All Markets;AUD
-CSPXJ;LINK REAL ESTATE INVESTMENT TRUST;Immobili;Azionario;18.802.320,32;0,66;18.802.320,32;4.176.805,00;4,50;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;FISHER AND PAYKEL HEALTHCARE CORPO;Salute;Azionario;18.578.557,72;0,65;18.578.557,72;930.744,00;19,96;Nuova Zelanda;New Zealand Exchange Ltd;NZD
-CSPXJ;SANTOS LTD;Energia;Azionario;18.550.836,67;0,65;18.550.836,67;5.156.799,00;3,60;Australia;Asx - All Markets;AUD
-CSPXJ;TELSTRA GROUP LTD;Comunicazione;Azionario;18.133.692,95;0,64;18.133.692,95;6.429.063,00;2,82;Australia;Asx - All Markets;AUD
-CSPXJ;SCENTRE GROUP;Immobili;Azionario;18.092.585,22;0,64;18.092.585,22;8.260.519,00;2,19;Australia;Asx - All Markets;AUD
-CSPXJ;ORIGIN ENERGY LTD;Imprese di servizi di pubblica utilità;Azionario;17.714.220,68;0,62;17.714.220,68;2.735.686,00;6,48;Australia;Asx - All Markets;AUD
-CSPXJ;COCHLEAR LTD;Salute;Azionario;17.494.462,64;0,62;17.494.462,64;105.275,00;166,18;Australia;Asx - All Markets;AUD
-CSPXJ;HONG KONG AND CHINA GAS LTD;Imprese di servizi di pubblica utilità;Azionario;15.839.668,58;0,56;15.839.668,58;17.822.841,00;0,89;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;HANG SENG BANK LTD;Finanziari;Azionario;15.576.823,50;0,55;15.576.823,50;1.212.400,00;12,85;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;WISETECH GLOBAL LTD;IT;Azionario;15.257.414,01;0,54;15.257.414,01;292.235,00;52,21;Australia;Asx - All Markets;AUD
-CSPXJ;GRAB HOLDINGS LTD CLASS A;Industriali;Azionario;15.246.192,96;0,54;15.246.192,96;3.709.536,00;4,11;Singapore;NASDAQ;USD
-CSPXJ;JAMES HARDIE INDUSTRIES CDI PLC;Materiali;Azionario;15.188.601,00;0,53;15.188.601,00;682.552,00;22,25;Australia;Asx - All Markets;AUD
-CSPXJ;CAPITALAND INTEGRATED COMMERCIAL T;Immobili;Azionario;15.023.869,04;0,53;15.023.869,04;9.299.208,00;1,62;Singapore;Singapore Exchange;SGD
-CSPXJ;POWER ASSETS HOLDINGS LTD;Imprese di servizi di pubblica utilità;Azionario;13.987.419,34;0,49;13.987.419,34;2.209.500,00;6,33;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SINGAPORE EXCHANGE LTD;Finanziari;Azionario;13.803.243,41;0,49;13.803.243,41;1.319.200,00;10,46;Singapore;Singapore Exchange;SGD
-CSPXJ;ASX LTD;Finanziari;Azionario;13.781.043,71;0,48;13.781.043,71;319.099,00;43,19;Australia;Asx - All Markets;AUD
-CSPXJ;SINGAPORE TECHNOLOGIES ENGINEERING;Industriali;Azionario;13.508.529,95;0,48;13.508.529,95;2.486.100,00;5,43;Singapore;Singapore Exchange;SGD
-CSPXJ;REA GROUP LTD;Comunicazione;Azionario;12.977.901,10;0,46;12.977.901,10;84.933,00;152,80;Australia;Asx - All Markets;AUD
-CSPXJ;MEDIBANK PRIVATE LTD;Finanziari;Azionario;12.588.133,50;0,44;12.588.133,50;4.403.319,00;2,86;Australia;Asx - All Markets;AUD
-CSPXJ;STOCKLAND STAPLED UNITS LTD;Immobili;Azionario;12.549.793,65;0,44;12.549.793,65;3.797.820,00;3,30;Australia;Asx - All Markets;AUD
-CSPXJ;CAR GROUP LTD;Comunicazione;Azionario;12.528.088,24;0,44;12.528.088,24;602.099,00;20,81;Australia;Asx - All Markets;AUD
-CSPXJ;GALAXY ENTERTAINMENT GROUP LTD;Consumi Discrezionali;Azionario;12.475.691,98;0,44;12.475.691,98;3.541.500,00;3,52;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SOUTH32 LTD;Materiali;Azionario;12.382.293,64;0,44;12.382.293,64;7.229.595,00;1,71;Australia;Asx - All Markets;AUD
-CSPXJ;AUCKLAND INTERNATIONAL AIRPORT LTD;Industriali;Azionario;12.358.392,63;0,43;12.358.392,63;2.599.095,00;4,75;Nuova Zelanda;New Zealand Exchange Ltd;NZD
-CSPXJ;CK ASSET HOLDINGS LTD;Immobili;Azionario;12.104.696,66;0,43;12.104.696,66;3.091.436,00;3,92;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;PRO MEDICUS LTD;Salute;Azionario;12.045.313,48;0,42;12.045.313,48;91.318,00;131,91;Australia;Asx - All Markets;AUD
-CSPXJ;CAPITALAND ASCENDAS REIT;Immobili;Azionario;11.910.837,48;0,42;11.910.837,48;5.942.738,00;2,00;Singapore;Singapore Exchange;SGD
-CSPXJ;SONIC HEALTHCARE LTD;Salute;Azionario;11.630.195,68;0,41;11.630.195,68;719.715,00;16,16;Australia;Asx - All Markets;AUD
-CSPXJ;WH GROUP LTD;Generi di largo consumo;Azionario;11.587.197,59;0,41;11.587.197,59;13.307.965,00;0,87;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SINGAPORE AIRLINES LTD;Industriali;Azionario;11.540.346,46;0,41;11.540.346,46;2.373.549,00;4,86;Singapore;Singapore Exchange;SGD
-CSPXJ;THE LOTTERY CORPORATION LTD;Consumi Discrezionali;Azionario;11.493.841,64;0,40;11.493.841,64;3.546.603,00;3,24;Australia;Asx - All Markets;AUD
-CSPXJ;KEPPEL LTD;Industriali;Azionario;11.012.935,53;0,39;11.012.935,53;2.334.600,00;4,72;Singapore;Singapore Exchange;SGD
-CSPXJ;APA GROUP UNITS;Imprese di servizi di pubblica utilità;Azionario;10.777.319,84;0,38;10.777.319,84;2.069.296,00;5,21;Australia;Asx - All Markets;AUD
-CSPXJ;JARDINE MATHESON HOLDINGS LTD;Industriali;Azionario;10.462.088,00;0,37;10.462.088,00;254.800,00;41,06;Hong Kong;Singapore Exchange;USD
-CSPXJ;AUD CASH;Liquidità e/o derivati;Contanti;9.931.062,31;0,35;9.931.062,31;15.597.711,00;63,67;Australia;--;AUD
-CSPXJ;SGH LTD;Industriali;Azionario;9.819.510,02;0,35;9.819.510,02;321.973,00;30,50;Australia;Asx - All Markets;AUD
-CSPXJ;BLUESCOPE STEEL LTD;Materiali;Azionario;9.601.173,46;0,34;9.601.173,46;697.806,00;13,76;Australia;Asx - All Markets;AUD
-CSPXJ;INFRATIL LTD;Finanziari;Azionario;9.490.903,05;0,33;9.490.903,05;1.498.433,00;6,33;Nuova Zelanda;New Zealand Exchange Ltd;NZD
-CSPXJ;WASHINGTON H SOUL PATTINSON & COMP;Finanziari;Azionario;9.101.938,95;0,32;9.101.938,95;394.794,00;23,05;Australia;Asx - All Markets;AUD
-CSPXJ;VICINITY CENTRES;Immobili;Azionario;8.864.734,57;0,31;8.864.734,57;6.160.592,00;1,44;Australia;Asx - All Markets;AUD
-CSPXJ;GPT GROUP STAPLED UNITS;Immobili;Azionario;8.535.323,72;0,30;8.535.323,72;2.999.008,00;2,85;Australia;Asx - All Markets;AUD
-CSPXJ;HKT TRUST AND HKT UNITS LTD;Comunicazione;Azionario;8.473.615,01;0,30;8.473.615,01;6.125.540,00;1,38;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;MTR CORPORATION CORP LTD;Industriali;Azionario;8.254.783,09;0,29;8.254.783,09;2.479.277,00;3,33;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;HONGKONG LAND HOLDINGS LTD;Immobili;Azionario;7.408.172,00;0,26;7.408.172,00;1.798.100,00;4,12;Hong Kong;Singapore Exchange;USD
-CSPXJ;CAPITALAND INVESTMENT LTD;Immobili;Azionario;7.348.202,26;0,26;7.348.202,26;3.722.900,00;1,97;Singapore;Singapore Exchange;SGD
-CSPXJ;FUTU HOLDINGS ADR LTD;Finanziari;Azionario;7.320.233,25;0,26;7.320.233,25;91.905,00;79,65;Hong Kong;NASDAQ;USD
-CSPXJ;TREASURY WINE ESTATES LTD;Generi di largo consumo;Azionario;7.211.131,13;0,25;7.211.131,13;1.309.340,00;5,51;Australia;Asx - All Markets;AUD
-CSPXJ;WILMAR INTERNATIONAL LTD;Generi di largo consumo;Azionario;7.135.823,05;0,25;7.135.823,05;3.030.300,00;2,35;Singapore;Singapore Exchange;SGD
-CSPXJ;MERIDIAN ENERGY LTD;Imprese di servizi di pubblica utilità;Azionario;6.942.333,67;0,24;6.942.333,67;2.056.689,00;3,38;Nuova Zelanda;New Zealand Exchange Ltd;NZD
-CSPXJ;CONTACT ENERGY LTD;Imprese di servizi di pubblica utilità;Azionario;6.877.009,81;0,24;6.877.009,81;1.268.298,00;5,42;Nuova Zelanda;New Zealand Exchange Ltd;NZD
-CSPXJ;SEMBCORP INDUSTRIES LTD;Imprese di servizi di pubblica utilità;Azionario;6.806.820,61;0,24;6.806.820,61;1.406.600,00;4,84;Singapore;Singapore Exchange;SGD
-CSPXJ;SANDS CHINA LTD;Consumi Discrezionali;Azionario;6.604.062,39;0,23;6.604.062,39;3.932.000,00;1,68;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;YANGZIJIANG SHIPBUILDING (HOLDINGS;Industriali;Azionario;6.546.567,60;0,23;6.546.567,60;4.170.100,00;1,57;Singapore;Singapore Exchange;SGD
-CSPXJ;QANTAS AIRWAYS LTD;Industriali;Azionario;6.533.891,08;0,23;6.533.891,08;1.203.062,00;5,43;Australia;Asx - All Markets;AUD
-CSPXJ;CHEUNG KONG INFRASTRUCTURE HOLDING;Imprese di servizi di pubblica utilità;Azionario;6.407.050,58;0,23;6.407.050,58;1.009.000,00;6,35;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SINO LAND LTD;Immobili;Azionario;6.320.060,33;0,22;6.320.060,33;6.430.972,00;0,98;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;HENDERSON LAND DEVELOPMENT LTD;Immobili;Azionario;6.212.362,74;0,22;6.212.362,74;2.307.759,00;2,69;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;WHARF REAL ESTATE INVESTMENT COMPA;Immobili;Azionario;6.067.877,11;0,21;6.067.877,11;2.623.073,00;2,31;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SITC INTERNATIONAL HOLDINGS LTD;Industriali;Azionario;5.480.915,52;0,19;5.480.915,52;2.198.000,00;2,49;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SWIRE PACIFIC LTD A;Industriali;Azionario;5.358.097,79;0,19;5.358.097,79;648.476,00;8,26;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;GENTING SINGAPORE LTD;Consumi Discrezionali;Azionario;5.152.228,32;0,18;5.152.228,32;9.455.600,00;0,54;Singapore;Singapore Exchange;SGD
-CSPXJ;WHARF (HOLDINGS) LTD;Immobili;Azionario;4.016.667,28;0,14;4.016.667,28;1.682.039,00;2,39;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
-CSPXJ;SGD CASH;Liquidità e/o derivati;Contanti;3.675.761,20;0,13;3.675.761,20;4.823.334,00;76,21;Singapore;--;SGD
-CSPXJ;REECE LTD;Industriali;Azionario;3.448.040,57;0,12;3.448.040,57;351.655,00;9,81;Australia;Asx - All Markets;AUD
-CSPXJ;USD CASH;Liquidità e/o derivati;Contanti;2.290.046,35;0,08;2.290.046,35;2.290.046,00;100,00;Stati Uniti;--;USD
-CSPXJ;CASH COLLATERAL USD MLIFT;Liquidità e/o derivati;Cash Collateral and Margins;1.618.000,00;0,06;1.618.000,00;1.618.000,00;100,00;Stati Uniti;--;USD
-CSPXJ;HKD CASH;Liquidità e/o derivati;Contanti;1.080.310,59;0,04;1.080.310,59;8.387.423,00;12,88;Hong Kong;--;HKD
-CSPXJ;NZD CASH;Liquidità e/o derivati;Contanti;286.430,16;0,01;286.430,16;480.708,00;59,59;Nuova Zelanda;--;NZD
-CSPXJ;GBP CASH;Liquidità e/o derivati;Contanti;104.805,97;0,00;104.805,97;79.197,00;132,33;Regno unito;--;GBP
-CSPXJ;EUR CASH;Liquidità e/o derivati;Contanti;16.494,15;0,00;16.494,15;14.532,00;113,50;Unione Europea;--;EUR
-CSPXJ;MSCI SING IX ETS APR 25;Liquidità e/o derivati;Futures;0,00;0,00;2.903.105,47;103,00;281,85;--;Singapore Exchange Derivatives Clearing Limited;SGD
-CSPXJ;MSCI HONG KONG INDEX JUN 25;Liquidità e/o derivati;Futures;0,00;0,00;3.316.980,00;59,00;56.220,00;--;Eurex Deutschland;USD
-CSPXJ;SPI 200 JUN 25;Liquidità e/o derivati;Futures;0,00;0,00;12.218.814,20;98,00;4.987,27;--;Asx - Trade24;AUD
+﻿15-dic-2025;;;;;;;;;;;
+iShares Core MSCI Pacific ex-Japan UCITS ETF;;;;;;;;;;;
+Inception Date;12/01/2010;;;;;;;;;;
+Fund Holdings as of;15/12/2025;;;;;;;;;;
+Number of Securities;94,00;;;;;;;;;;
+Shares Outstanding;15.650.285,00;;;;;;;;;;
+;;;;;;;;;;;
+Ticker dell'emittente;Nome;Settore;Asset Class;Valore di mercato;Ponderazione (%);Valore nozionale;Nominale;Prezzo;Area Geografica;Cambio;Valuta di mercato
+CBA;COMMONWEALTH BANK OF AUSTRALIA;Finanziari;Azionario;280.010.814,76;8,25;280.010.814,76;2.714.968,00;103,14;Australia;Asx - All Markets;AUD
+BHP;BHP GROUP LTD;Materiali;Azionario;242.592.505,82;7,15;242.592.505,82;8.239.741,00;29,44;Australia;Asx - All Markets;AUD
+1299;AIA GROUP LTD;Finanziari;Azionario;176.618.872,60;5,20;176.618.872,60;17.042.024,00;10,36;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+D05;DBS GROUP HOLDINGS LTD;Finanziari;Azionario;148.232.421,35;4,37;148.232.421,35;3.454.735,00;42,91;Singapore;Singapore Exchange;SGD
+WBC;WESTPAC BANKING CORPORATION CORP;Finanziari;Azionario;143.511.678,00;4,23;143.511.678,00;5.548.748,00;25,86;Australia;Asx - All Markets;AUD
+NAB;NATIONAL AUSTRALIA BANK LTD;Finanziari;Azionario;139.456.541,93;4,11;139.456.541,93;4.969.036,00;28,07;Australia;Asx - All Markets;AUD
+ANZ;ANZ GROUP HOLDINGS LTD;Finanziari;Azionario;116.649.797,72;3,44;116.649.797,72;4.839.957,00;24,10;Australia;Asx - All Markets;AUD
+388;HONG KONG EXCHANGES AND CLEARING L;Finanziari;Azionario;101.543.847,18;2,99;101.543.847,18;1.956.932,00;51,89;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+WES;WESFARMERS LTD;Consumi Discrezionali;Azionario;99.518.685,95;2,93;99.518.685,95;1.840.828,00;54,06;Australia;Asx - All Markets;AUD
+CSL;CSL LTD;Salute;Azionario;93.850.914,15;2,76;93.850.914,15;787.009,00;119,25;Australia;Asx - All Markets;AUD
+O39;OVERSEA-CHINESE BANKING LTD;Finanziari;Azionario;82.226.371,95;2,42;82.226.371,95;5.492.841,00;14,97;Singapore;Singapore Exchange;SGD
+MQG;MACQUARIE GROUP LTD DEF;Finanziari;Azionario;78.269.692,66;2,31;78.269.692,66;587.539,00;133,22;Australia;Asx - All Markets;AUD
+SE;SEA ADS REPRESENTING LTD CLASS A;Consumi Discrezionali;Azionario;75.433.085,52;2,22;75.433.085,52;620.542,00;121,56;Singapore;New York Stock Exchange Inc.;USD
+GMG;GOODMAN GROUP UNITS;Immobili;Azionario;65.027.060,42;1,92;65.027.060,42;3.316.747,00;19,61;Australia;Asx - All Markets;AUD
+RIO;RIO TINTO LTD;Materiali;Azionario;56.155.662,59;1,65;56.155.662,59;603.389,00;93,07;Australia;Asx - All Markets;AUD
+U11;UNITED OVERSEAS BANK LTD;Finanziari;Azionario;54.633.003,60;1,61;54.633.003,60;2.025.319,00;26,98;Singapore;Singapore Exchange;SGD
+WDS;WOODSIDE ENERGY GROUP LTD;Energia;Azionario;50.367.843,93;1,48;50.367.843,93;3.084.946,00;16,33;Australia;Asx - All Markets;AUD
+TCL;TRANSURBAN GROUP STAPLED UNITS;Industriali;Azionario;48.439.416,64;1,43;48.439.416,64;5.051.023,00;9,59;Australia;Asx - All Markets;AUD
+Z74;SINGAPORE TELECOMMUNICATIONS LTD;Comunicazione;Azionario;43.680.348,14;1,29;43.680.348,14;12.052.783,00;3,62;Singapore;Singapore Exchange;SGD
+FMG;FORTESCUE LTD;Materiali;Azionario;41.581.551,86;1,22;41.581.551,86;2.749.514,00;15,12;Australia;Asx - All Markets;AUD
+NST;NORTHERN STAR RESOURCES LTD;Materiali;Azionario;39.333.061,82;1,16;39.333.061,82;2.209.302,00;17,80;Australia;Asx - All Markets;AUD
+WOW;WOOLWORTHS GROUP LTD;Generi di largo consumo;Azionario;38.782.361,75;1,14;38.782.361,75;1.981.480,00;19,57;Australia;Asx - All Markets;AUD
+ALL;ARISTOCRAT LEISURE LTD;Consumi Discrezionali;Azionario;34.069.410,04;1,00;34.069.410,04;901.590,00;37,79;Australia;Asx - All Markets;AUD
+BXB;BRAMBLES LTD;Industriali;Azionario;33.351.477,26;0,98;33.351.477,26;2.216.033,00;15,05;Australia;Asx - All Markets;AUD
+QBE;QBE INSURANCE GROUP LTD;Finanziari;Azionario;31.490.266,05;0,93;31.490.266,05;2.445.776,00;12,88;Australia;Asx - All Markets;AUD
+COL;COLES GROUP LTD;Generi di largo consumo;Azionario;31.305.015,30;0,92;31.305.015,30;2.182.275,00;14,35;Australia;Asx - All Markets;AUD
+1;CK HUTCHISON HOLDINGS LTD;Industriali;Azionario;30.765.997,02;0,91;30.765.997,02;4.372.958,00;7,04;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+2388;BOC HONG KONG HOLDINGS LTD;Finanziari;Azionario;29.594.388,30;0,87;29.594.388,30;6.016.250,00;4,92;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+16;SUN HUNG KAI PROPERTIES LTD;Immobili;Azionario;28.984.088,95;0,85;28.984.088,95;2.337.334,00;12,40;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+669;TECHTRONIC INDUSTRIES LTD;Industriali;Azionario;27.853.571,41;0,82;27.853.571,41;2.371.500,00;11,75;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+EVN;EVOLUTION MINING LTD;Materiali;Azionario;26.887.626,23;0,79;26.887.626,23;3.292.303,00;8,17;Australia;Asx - All Markets;AUD
+11;HANG SENG BANK LTD;Finanziari;Azionario;23.835.850,91;0,70;23.835.850,91;1.208.400,00;19,73;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+SCG;SCENTRE GROUP;Immobili;Azionario;23.476.667,63;0,69;23.476.667,63;8.465.373,00;2,77;Australia;Asx - All Markets;AUD
+2;CLP HOLDINGS LTD;Imprese di servizi di pubblica utilità;Azionario;23.449.649,51;0,69;23.449.649,51;2.664.000,00;8,80;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+STO;SANTOS LTD;Energia;Azionario;21.897.807,45;0,65;21.897.807,45;5.276.692,00;4,15;Australia;Asx - All Markets;AUD
+ORG;ORIGIN ENERGY LTD;Imprese di servizi di pubblica utilità;Azionario;21.671.044,21;0,64;21.671.044,21;2.799.449,00;7,74;Australia;Asx - All Markets;AUD
+FPH;FISHER AND PAYKEL HEALTHCARE CORPO;Salute;Azionario;20.961.795,76;0,62;20.961.795,76;954.942,00;21,95;Nuova Zelanda;New Zealand Exchange Ltd;NZD
+TLS;TELSTRA GROUP LTD;Comunicazione;Azionario;20.632.670,51;0,61;20.632.670,51;6.423.238,00;3,21;Australia;Asx - All Markets;AUD
+XRO;XERO LTD;IT;Azionario;20.312.748,84;0,60;20.312.748,84;269.103,00;75,48;Australia;Asx - All Markets;AUD
+IAG;INSURANCE AUSTRALIA GROUP LTD;Finanziari;Azionario;20.172.945,48;0,59;20.172.945,48;3.869.002,00;5,21;Australia;Asx - All Markets;AUD
+SUN;SUNCORP GROUP LTD;Finanziari;Azionario;20.164.631,50;0,59;20.164.631,50;1.742.556,00;11,57;Australia;Asx - All Markets;AUD
+GRAB;GRAB HOLDINGS LTD CLASS A;Industriali;Azionario;19.405.613,20;0,57;19.405.613,20;3.865.660,00;5,02;Singapore;NASDAQ;USD
+CPU;COMPUTERSHARE LTD;Industriali;Azionario;19.243.622,43;0,57;19.243.622,43;848.054,00;22,69;Australia;Asx - All Markets;AUD
+823;LINK REAL ESTATE INVESTMENT TRUST;Immobili;Azionario;18.805.347,31;0,55;18.805.347,31;4.241.805,00;4,43;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+BN4;KEPPEL LTD;Industriali;Azionario;18.590.082,26;0,55;18.590.082,26;2.371.800,00;7,84;Singapore;Singapore Exchange;SGD
+COH;COCHLEAR LTD;Salute;Azionario;18.529.003,10;0,55;18.529.003,10;105.303,00;175,96;Australia;Asx - All Markets;AUD
+J36;JARDINE MATHESON HOLDINGS LTD;Industriali;Azionario;18.222.900,00;0,54;18.222.900,00;264.100,00;69,00;Hong Kong;Singapore Exchange;USD
+S68;SINGAPORE EXCHANGE LTD;Finanziari;Azionario;18.143.284,96;0,53;18.143.284,96;1.375.261,00;13,19;Singapore;Singapore Exchange;SGD
+C38U;CAPITALAND INTEGRATED COMMERCIAL T;Immobili;Azionario;17.766.031,04;0,52;17.766.031,04;9.867.805,00;1,80;Singapore;Singapore Exchange;SGD
+S32;SOUTH32 LTD;Materiali;Azionario;16.877.002,96;0,50;16.877.002,96;7.229.927,00;2,33;Australia;Asx - All Markets;AUD
+3;HONG KONG AND CHINA GAS LTD;Imprese di servizi di pubblica utilità;Azionario;16.678.328,37;0,49;16.678.328,37;18.383.841,00;0,91;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+SIG;SIGMA HEALTHCARE LTD;Salute;Azionario;16.297.839,46;0,48;16.297.839,46;8.421.370,00;1,94;Australia;Asx - All Markets;AUD
+S63;SINGAPORE TECHNOLOGIES ENGINEERING;Industriali;Azionario;16.214.881,27;0,48;16.214.881,27;2.529.600,00;6,41;Singapore;Singapore Exchange;SGD
+1113;CK ASSET HOLDINGS LTD;Immobili;Azionario;15.953.183,76;0,47;15.953.183,76;3.150.936,00;5,06;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+27;GALAXY ENTERTAINMENT GROUP LTD;Consumi Discrezionali;Azionario;15.746.826,95;0,46;15.746.826,95;3.194.500,00;4,93;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+288;WH GROUP LTD;Generi di largo consumo;Azionario;15.489.016,74;0,46;15.489.016,74;13.558.465,00;1,14;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+6;POWER ASSETS HOLDINGS LTD;Imprese di servizi di pubblica utilità;Azionario;15.467.768,36;0,46;15.467.768,36;2.252.000,00;6,87;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+SGP;STOCKLAND STAPLED UNITS LTD;Immobili;Azionario;15.251.288,41;0,45;15.251.288,41;3.933.541,00;3,88;Australia;Asx - All Markets;AUD
+WTC;WISETECH GLOBAL LTD;IT;Azionario;15.165.325,72;0,45;15.165.325,72;323.405,00;46,89;Australia;Asx - All Markets;AUD
+FUTU;FUTU HOLDINGS ADR LTD;Finanziari;Azionario;14.926.581,78;0,44;14.926.581,78;92.202,00;161,89;Hong Kong;NASDAQ;USD
+PME;PRO MEDICUS LTD;Salute;Azionario;14.401.269,67;0,42;14.401.269,67;92.663,00;155,42;Australia;Asx - All Markets;AUD
+MPL;MEDIBANK PRIVATE LTD;Finanziari;Azionario;14.235.133,91;0,42;14.235.133,91;4.487.339,00;3,17;Australia;Asx - All Markets;AUD
+A17U;CAPITALAND ASCENDAS REIT;Immobili;Azionario;13.644.796,59;0,40;13.644.796,59;6.370.538,00;2,14;Singapore;Singapore Exchange;SGD
+SOL;WASHINGTON H SOUL PATTINSON & COMP;Finanziari;Azionario;13.082.668,17;0,39;13.082.668,17;559.173,00;23,40;Australia;Asx - All Markets;AUD
+APA;APA GROUP UNITS;Imprese di servizi di pubblica utilità;Azionario;12.860.931,17;0,38;12.860.931,17;2.132.116,00;6,03;Australia;Asx - All Markets;AUD
+H78;HONGKONG LAND HOLDINGS LTD;Immobili;Azionario;12.724.423,00;0,37;12.724.423,00;1.794.700,00;7,09;Hong Kong;Singapore Exchange;USD
+CAR;CAR GROUP LTD;Comunicazione;Azionario;12.719.233,55;0,37;12.719.233,55;613.775,00;20,72;Australia;Asx - All Markets;AUD
+AIA;AUCKLAND INTERNATIONAL AIRPORT LTD;Industriali;Azionario;12.537.307,37;0,37;12.537.307,37;2.651.133,00;4,73;Nuova Zelanda;New Zealand Exchange Ltd;NZD
+C6L;SINGAPORE AIRLINES LTD;Industriali;Azionario;12.447.982,06;0,37;12.447.982,06;2.538.049,00;4,90;Singapore;Singapore Exchange;SGD
+TLC;THE LOTTERY CORPORATION LTD;Consumi Discrezionali;Azionario;12.429.424,10;0,37;12.429.424,10;3.621.988,00;3,43;Australia;Asx - All Markets;AUD
+LYC;LYNAS RARE EARTHS LTD;Materiali;Azionario;12.305.763,18;0,36;12.305.763,18;1.468.533,00;8,38;Australia;Asx - All Markets;AUD
+SHL;SONIC HEALTHCARE LTD;Salute;Azionario;11.740.254,04;0,35;11.740.254,04;768.198,00;15,28;Australia;Asx - All Markets;AUD
+BS6;YANGZIJIANG SHIPBUILDING (HOLDINGS;Industriali;Azionario;11.603.833,62;0,34;11.603.833,62;4.272.200,00;2,72;Singapore;Singapore Exchange;SGD
+AUD;AUD CASH;Liquidità e/o derivati;Contanti;11.454.392,83;0,34;11.454.392,83;17.223.356,00;66,50;Australia;--;AUD
+ASX;ASX LTD;Finanziari;Azionario;11.241.023,84;0,33;11.241.023,84;314.993,00;35,69;Australia;Asx - All Markets;AUD
+VCX;VICINITY CENTRES;Immobili;Azionario;10.749.043,11;0,32;10.749.043,11;6.338.337,00;1,70;Australia;Asx - All Markets;AUD
+REA;REA GROUP LTD;Comunicazione;Azionario;10.679.245,26;0,31;10.679.245,26;84.926,00;125,75;Australia;Asx - All Markets;AUD
+1928;SANDS CHINA LTD;Consumi Discrezionali;Azionario;10.155.963,48;0,30;10.155.963,48;3.932.000,00;2,58;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+SGH;SGH LTD;Industriali;Azionario;10.113.695,93;0,30;10.113.695,93;329.879,00;30,66;Australia;Asx - All Markets;AUD
+66;MTR CORPORATION CORP LTD;Industriali;Azionario;9.936.378,24;0,29;9.936.378,24;2.550.277,00;3,90;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+IFT;INFRATIL LTD;Finanziari;Azionario;9.892.091,73;0,29;9.892.091,73;1.508.671,00;6,56;Nuova Zelanda;New Zealand Exchange Ltd;NZD
+6823;HKT TRUST AND HKT UNITS LTD;Comunicazione;Azionario;9.272.593,78;0,27;9.272.593,78;6.125.540,00;1,51;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+12;HENDERSON LAND DEVELOPMENT LTD;Immobili;Azionario;8.909.098,17;0,26;8.909.098,17;2.385.759,00;3,73;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+1997;WHARF REAL ESTATE INVESTMENT COMPA;Immobili;Azionario;8.490.362,92;0,25;8.490.362,92;2.710.073,00;3,13;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+83;SINO LAND LTD;Immobili;Azionario;8.064.531,94;0,24;8.064.531,94;5.942.972,00;1,36;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+9CI;CAPITALAND INVESTMENT LTD;Immobili;Azionario;7.847.955,92;0,23;7.847.955,92;3.845.200,00;2,04;Singapore;Singapore Exchange;SGD
+QAN;QANTAS AIRWAYS LTD;Industriali;Azionario;7.840.079,21;0,23;7.840.079,21;1.201.703,00;6,52;Australia;Asx - All Markets;AUD
+1308;SITC INTERNATIONAL HOLDINGS LTD;Industriali;Azionario;7.755.948,06;0,23;7.755.948,06;2.190.000,00;3,54;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+1038;CHEUNG KONG INFRASTRUCTURE HOLDING;Imprese di servizi di pubblica utilità;Azionario;7.535.707,63;0,22;7.535.707,63;1.050.000,00;7,18;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+CEN;CONTACT ENERGY LTD;Imprese di servizi di pubblica utilità;Azionario;7.448.644,53;0,22;7.448.644,53;1.380.318,00;5,40;Nuova Zelanda;New Zealand Exchange Ltd;NZD
+F34;WILMAR INTERNATIONAL LTD;Generi di largo consumo;Azionario;7.438.416,89;0,22;7.438.416,89;3.132.400,00;2,37;Singapore;Singapore Exchange;SGD
+U96;SEMBCORP INDUSTRIES LTD;Imprese di servizi di pubblica utilità;Azionario;6.827.595,06;0,20;6.827.595,06;1.463.900,00;4,66;Singapore;Singapore Exchange;SGD
+MEL;MERIDIAN ENERGY LTD;Imprese di servizi di pubblica utilità;Azionario;6.774.902,25;0,20;6.774.902,25;2.138.431,00;3,17;Nuova Zelanda;New Zealand Exchange Ltd;NZD
+4;WHARF (HOLDINGS) LTD;Immobili;Azionario;4.980.008,68;0,15;4.980.008,68;1.682.039,00;2,96;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+19;SWIRE PACIFIC LTD A;Industriali;Azionario;4.722.683,75;0,14;4.722.683,75;564.976,00;8,36;Hong Kong;Hong Kong Exchanges And Clearing Ltd;HKD
+HKD;HKD CASH;Liquidità e/o derivati;Contanti;2.955.292,16;0,09;2.955.292,16;22.997.936,00;12,85;Hong Kong;--;HKD
+SGD;SGD CASH;Liquidità e/o derivati;Contanti;2.904.129,56;0,09;2.904.129,56;3.742.261,00;77,60;Singapore;--;SGD
+USD;USD CASH;Liquidità e/o derivati;Contanti;2.157.137,75;0,06;2.157.137,75;2.157.138,00;100,00;Stati Uniti;--;USD
+MLIFT;CASH COLLATERAL USD MLIFT;Liquidità e/o derivati;Cash Collateral and Margins;1.339.000,00;0,04;1.339.000,00;1.339.000,00;100,00;Stati Uniti;--;USD
+NZD;NZD CASH;Liquidità e/o derivati;Contanti;647.270,58;0,02;647.270,58;1.115.503,00;58,02;Nuova Zelanda;--;NZD
+GBP;GBP CASH;Liquidità e/o derivati;Contanti;45.207,71;0,00;45.207,71;33.751,00;133,94;Regno unito;--;GBP
+EUR;EUR CASH;Liquidità e/o derivati;Contanti;18.374,98;0,00;18.374,98;15.622,00;117,62;Unione Europea;--;EUR
+QZZ5;MSCI SING IX ETS DEC 25;Liquidità e/o derivati;Futures;0,00;0,00;3.456.150,09;101,00;342,19;--;Singapore Exchange Derivatives Clearing Limited;SGD
+ZSSH6;MSCI HONG KONG INDEX MAR 26;Liquidità e/o derivati;Futures;0,00;0,00;4.085.770,00;53,00;77.090,00;--;Eurex Deutschland;USD
+XPH6;SPI 200 MAR 26;Liquidità e/o derivati;Futures;0,00;0,00;13.192.929,38;92,00;5.736,04;--;Asx - Trade24;AUD

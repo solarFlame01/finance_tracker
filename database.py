@@ -3,7 +3,7 @@ from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
 import logging
-
+from utils import normalize_data
 # Carica le variabili dal file .env
 load_dotenv() 
 # Reference Supabase: https://supabase.com/docs/reference/python/eq
@@ -43,6 +43,55 @@ response = (
     .execute()
 )
 '''
+
+def insert_directa_transaction(transaction_data):
+    """
+    Inserisce una transazione nel database Supabase.
+    Parametri:
+        transaction_data (dict): Dizionario con le chiavi:
+            Data operazione, Data valuta, Tipo operazione, Ticker, Isin, 
+            Protocollo, Descrizione, Quantità, Importo euro, Importo Divisa, 
+            Divisa, Riferimento ordine
+    Ritorna:
+        response: Risultato dell'operazione di insert
+    """
+    batch_data = []
+
+    for row in transaction_data:
+        data = {
+            "data_operazione": normalize_data(row.get("data_operazione")),
+            "data_valuta": normalize_data(row.get("data_valuta")),
+            "tipo_operazione": row.get("tipo_operazione"),
+            "ticker": row.get("ticker"),
+            "isin": row.get("isin"),
+            "protocollo": row.get("protocollo"),
+            "descrizione": row.get("descrizione"),
+            "quantita": row.get("quantita"),
+            "importo_euro": row.get("importo_euro"),
+            "importo_divisa": row.get("importo_divisa"),
+            "divisa": row.get("divisa"),
+            "riferimento_ordine": row.get("riferimento_ordine")
+        }
+        batch_data.append(data)
+
+    # Esegui l'UPSERT in un'unica chiamata fuori dal ciclo
+    if batch_data:
+        try:
+            # on_conflict: indica la colonna (o le colonne) che devono essere uniche.
+            # ignore_duplicates=True: se trova un conflitto, NON aggiorna e NON dà errore, semplicemente ignora la riga.
+            response = supabase.table("transaction").upsert(
+                batch_data, 
+                on_conflict="ticker, data_operazione, riferimento_ordine",  # <--- SOSTITUISCI con la tua colonna univoca (es. 'protocollo' o 'isin,riferimento_ordine')
+                ignore_duplicates=True
+            ).execute()
+                 
+        except Exception as e:
+            print(f"Errore durante l'upsert: {e}")
+            
+        results = response
+    return results
+
+
 # Funzione per inserire una lista di holding nel database
 def insert_holdings(etf_ticker, holdings):
     """
@@ -53,21 +102,39 @@ def insert_holdings(etf_ticker, holdings):
             Ticker, Nome, Settore, Asset Class, Valore di mercato, Ponderazione (%),
             Valore nozionale, Nominale, Prezzo, Area Geografica, Cambio, Valuta di mercato
     """
+    # Cerco se esistono già dati per questo etf_ticker e li elim
+    response = (
+        supabase.table("etf_holdings")
+        .select("*")
+        .eq("etf_ticker", etf_ticker)
+        .execute()
+    )
+    if len(response.data) > 0:
+        #Se esiste li elimino tutti prima di reinserirli
+        print("Dati holdings trovati, procedo con la cancellazione per poi reinserirli.")
+        response = (
+            supabase.table("etf_holdings")
+            .delete()
+            .eq("etf_ticker", etf_ticker)
+            .execute()
+        )
+    else:
+        print("Nessun dato trovato, procediamo con l'inserimento.")
+    
     results = []
     for row in holdings:
         data = {
             "etf_ticker": etf_ticker,
-            "ticker": row.get("Ticker"),
+            "ticker": row.get("Ticker dell'emittente"),
             "nome": row.get("Nome"),
             "settore": row.get("Settore"),
             "asset_class": row.get("Asset Class"),
-            "ponderazione": row.get("Ponderazione (%)").replace(",","."),
+            "ponderazione": row.get("Ponderazione (%)") if isinstance(row.get("Ponderazione (%)"), float) else row.get("Ponderazione (%)").replace(",", "."),
             "area_geografica": row.get("Area Geografica"),
             "cambio": row.get("Cambio"),
             "valuta_mercato": row.get("Valuta di mercato")
         }
-        logger = logging.getLogger(__name__)
-        logger.debug("Inserting ETF holding", extra={"etf_ticker": etf_ticker, "data": data})
+
         res = supabase.table("etf_holdings").insert(data).execute()
         results.append(res)
     return results
@@ -106,6 +173,20 @@ if __name__ == "__main__":
         }
     ]
     print("Test inserimento holdings su etf_holdings...")
-    insert_results = insert_holdings(test_etf_ticker, test_holdings)
-    for res in insert_results:
-        print(res)
+    #insert_results = insert_holdings(test_etf_ticker, test_holdings)
+    response = (
+        supabase.table("etf_holdings")
+        .select("*")
+        .eq("etf_ticker", "CSPX")
+        .execute()
+    )
+    if len(response.data) > 0:
+        print("Dati holdings trovati:")
+        response = (
+            supabase.table("etf_holdings")
+            .delete()
+            .eq("etf_ticker", "CSPX")
+            .execute()
+        )
+    else:
+        print("Nessun dato trovato.")

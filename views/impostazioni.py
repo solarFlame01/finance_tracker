@@ -2,12 +2,14 @@ import streamlit as st
 import pandas as pd
 import os
 import json
-from datetime import datetime
+import numpy as np
 import sys
-sys.path.append('..') # sale di un livello della cartella
+from datetime import datetime
 from data_manager import save_etf_data, load_etf_data
 from config import DATA_FILE, ETF_DETAILS_FILE
-# Sezione Impostazioni
+from utils import clean_col_name
+sys.path.append('..') # sale di un livello della cartella
+
 def render_impostazioni():
     st.header("⚙️ Impostazioni")
     
@@ -25,18 +27,18 @@ def render_impostazioni():
         
         if uploaded_directa is not None:
             try:
-                df_directa = pd.read_csv(uploaded_directa)
+                df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=',', encoding='cp1252')              
+                df_directa = df_directa.replace([np.inf, -np.inf], None).fillna(0)
+                df_directa.columns = [clean_col_name(col) for col in df_directa.columns] # ripulisce i caratteri speciali delle colonne
+                
+                from database import insert_directa_transaction  # Importa la funzione dal modulo database
+
+                with st.spinner("⏳ Caricamento dati in corso..."):
+                    insert_directa_transaction(df_directa.to_dict('records'))
                 st.success(f"✅ File caricato: {uploaded_directa.name}")
                 st.write("**Anteprima dati (prime 5 righe):**")
                 st.dataframe(df_directa.head(), width='stretch')
-                
-                # Opzioni per elaborazione
-                with st.expander("Opzioni di importazione"):
-                    auto_map = st.checkbox("Mappatura automatica colonne", value=True)
-                    sovrascrivi = st.checkbox("Sovrascrivi dati esistenti", value=False)
                     
-                    if st.button("Elabora e Importa", type="primary"):
-                        st.info("Funzionalità di importazione in sviluppo...")
             except Exception as e:
                 st.error(f"❌ Errore nel caricamento del file: {str(e)}")
         
@@ -53,12 +55,15 @@ def render_impostazioni():
             try:
                 from database import insert_holdings  # Importa la funzione dal modulo database
                 
-                df_details = pd.read_csv(uploaded_etf_details, sep=';')
+                df_details = pd.read_csv(uploaded_etf_details, sep=';',skiprows=7, encoding='latin-1')
+                 # Salva i dettagli caricati nello stato della sessione
                 st.session_state.etf_details = df_details
                 
                 etf_name = uploaded_etf_details.name.split('.')[0] # Nome etf preso dal nome del file
-                insert_holdings(etf_name, df_details.to_dict('records'))  # Esempio di inserimento nel DB
                 
+                with st.spinner("⏳ Caricamento dati in corso..."):
+                    insert_holdings(etf_name, df_details.to_dict('records'))
+                           
                 st.success(f"✅ File caricato: {uploaded_etf_details.name}")
                 st.write("**Anteprima dati:**")
                 st.dataframe(df_details.head(), width='stretch')
