@@ -4,33 +4,44 @@ from datetime import datetime
 def get_etf_price(ticker):
     """
     Recupera il prezzo corrente di un ETF da Yahoo Finance.
+    Prova prima con il suffisso .MI (mercato italiano), se non disponibile prova con .DE (mercato tedesco).
     
     Args:
         ticker (str): Il ticker dell'ETF (es: 'CSPXJ', 'EIMI', etc.)
     
     Returns:
         float: Il prezzo corrente dell'ETF
-        None: Se l'ETF non esiste o si verifica un errore
+        None: Se l'ETF non esiste su nessun mercato o si verifica un errore
     """
-    try:
-        etf = yf.Ticker(ticker + '.MI')  # Aggiunge il suffisso .MI per il mercato italiano
-        # Tenta di ottenere il prezzo corrente
-        info = etf.info
-        
-        # Prova diverse chiavi per il prezzo corrente
-        price = info.get('currentPrice') or info.get('regularMarketPrice')
-        
-        if price is None or price == 0:
-            # Se non trova currentPrice, prova con i dati storici più recenti
-            hist = etf.history(period='1d')
-            if not hist.empty:
-                price = hist['Close'].iloc[-1]
-        
-        return price
+    suffixes = ['.MI', '.DE']  # Prova prima .MI, poi .DE
     
-    except Exception as e:
-        print(f"❌ Errore nel recupero del prezzo per {ticker}: {str(e)}")
-        return None
+    for suffix in suffixes:
+        try:
+            full_ticker = ticker + suffix
+            etf = yf.Ticker(full_ticker)
+            
+            # Tenta di ottenere il prezzo corrente
+            info = etf.info
+            
+            # Prova diverse chiavi per il prezzo corrente
+            price = info.get('currentPrice') or info.get('regularMarketPrice')
+            
+            if price is None or price == 0:
+                # Se non trova currentPrice, prova con i dati storici più recenti
+                hist = etf.history(period='1d')
+                if not hist.empty:
+                    price = hist['Close'].iloc[-1]
+            
+            # Se il prezzo è trovato, ritorna
+            if price is not None and price != 0:
+                return price
+        
+        except Exception as e:
+            print(f"⚠️  {ticker}{suffix} non disponibile: {str(e)}")
+            continue  # Passa al suffisso successivo
+    
+    print(f"❌ Errore: {ticker} non trovato su nessun mercato (.MI e .DE)")
+    return None
 
 
 def get_etf_info(ticker):

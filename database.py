@@ -3,6 +3,7 @@ from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
 import logging
+import pandas as pd
 from utils import normalize_data
 # Carica le variabili dal file .env
 load_dotenv() 
@@ -91,6 +92,23 @@ def insert_directa_transaction(transaction_data):
         results = response
     return results
 
+
+def get_valid_value(value, default='-'):
+    """Controlla che il valore non sia None o nan"""
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return default
+    return value
+
+def get_numeric_value(value, default=0.0):
+    """Controlla e converte valore numerico, gestendo nan"""
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return default
+    if isinstance(value, float):
+        return value
+    if isinstance(value, str):
+        return float(value.replace(",", "."))
+    return default
+
 # Funzione per inserire una lista di holding nel database
 def insert_holdings(etf_ticker, holdings):
     """
@@ -123,15 +141,15 @@ def insert_holdings(etf_ticker, holdings):
     results = []
     for row in holdings:
         data = {
-            "etf_ticker": etf_ticker,
-            "ticker": row.get("Ticker dell'emittente"),
-            "nome": row.get("Nome"),
-            "settore": row.get("Settore"),
-            "asset_class": row.get("Asset Class"),
-            "ponderazione": row.get("Ponderazione (%)") if isinstance(row.get("Ponderazione (%)"), float) else row.get("Ponderazione (%)").replace(",", "."),
-            "area_geografica": row.get("Area Geografica"),
-            "cambio": row.get("Cambio"),
-            "valuta_mercato": row.get("Valuta di mercato")
+           "etf_ticker": etf_ticker,
+            "ticker": get_valid_value(row.get("Ticker dell'emittente"), etf_ticker),
+            "nome": get_valid_value(row.get("Nome")),
+            "settore": get_valid_value(row.get("Settore")),
+            "asset_class": get_valid_value(row.get("Asset Class")),
+            "ponderazione": get_numeric_value(row.get("Ponderazione (%)"), None),
+            "area_geografica": get_valid_value(row.get("Area Geografica")),
+            "cambio": get_valid_value(row.get("Cambio"), 'EUR'),
+            "valuta_mercato": get_valid_value(row.get("Valuta di mercato"))
         }
 
         res = supabase.table("etf_holdings").insert(data).execute()
