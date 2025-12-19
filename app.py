@@ -1,13 +1,9 @@
 # app.py
 import streamlit as st
-import pandas as pd
-import json
-import os
 from datetime import datetime
-import plotly.graph_objects as go
 
 from config import DATA_FILE, ETF_DETAILS_FILE, INTERMEDIARI
-from data_manager import load_etf_data, save_etf_data, load_etf_details, save_etf_details
+from data_manager import load_etf_data, load_etf_details, load_etf_name
 
 from views.dashboard import render_dashboard
 from views.gestione_eft import render_gestione_etf
@@ -15,13 +11,13 @@ from views.metriche import render_metriche
 from views.rendimento_annuo import render_rendimento_annuo
 from views.impostazioni import render_impostazioni
 from views.simula_eft import render_simula_etf
-
+from views.sidebar import render_sidebar
 # Configurazione pagina
 st.set_page_config(
     page_title="ETF Portfolio Tracker",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="collapsed"  # Nasconde la sidebar di default
+    initial_sidebar_state="expanded"  # Mostra la sidebar di default
 )
 
 # Inizializzazione session state
@@ -29,18 +25,17 @@ if 'etf_data' not in st.session_state:
     st.session_state.etf_data = load_etf_data()
 
 if 'etf_details' not in st.session_state:
-    st.session_state.etf_details = load_etf_details()    
-
+    st.session_state.etf_details = load_etf_details()   
+     
 # Navigazione principale con tab list
 def main():
+    # Sidebar - Azioni Rapide sempre accessibili
+    render_sidebar()
+    
     # Header dell'applicazione
     col_logo, col_title = st.columns([1, 5])
     st.title("ETF Portfolio Tracker")
-    st.caption("Gestione professionale del tuo portafoglio ETF")
-    
-    # Linea divisoria
-    st.divider()
-    
+        
     # Tab list principale
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📊 Dashboard",
@@ -69,7 +64,7 @@ def main():
     
     with tab6:
         render_simula_etf()
-    
+        
     # Footer
     st.divider()
     col_f1, col_f2, col_f3 = st.columns(3)

@@ -17,58 +17,60 @@ def render_impostazioni():
     tab1, tab2, tab3 = st.tabs(["📁 Importazione Dati", "🔧 Configurazione", "💾 Backup & Ripristino"])
     
     with tab1:
-        st.subheader("Caricamento transazioni Directa")
-        uploaded_directa = st.file_uploader(
-            "Carica file CSV transazioni Directa", 
-            type=['csv', 'txt'],
-            help="Seleziona il file CSV esportato dalla piattaforma Directa",
-            key="directa"
-        )
+        col_a1, col_a2 = st.columns(2)
         
-        if uploaded_directa is not None:
-            try:
-                df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=',', encoding='cp1252')              
-                df_directa = df_directa.replace([np.inf, -np.inf], None).fillna(0)
-                df_directa.columns = [clean_col_name(col) for col in df_directa.columns] # ripulisce i caratteri speciali delle colonne
-                
-                from database import insert_directa_transaction  # Importa la funzione dal modulo database
-
-                with st.spinner("⏳ Caricamento dati in corso..."):
-                    insert_directa_transaction(df_directa.to_dict('records'))
-                st.success(f"✅ File caricato: {uploaded_directa.name}")
-                st.write("**Anteprima dati (prime 5 righe):**")
-                st.dataframe(df_directa.head(), width='stretch')
+        with col_a1:
+            st.subheader("Caricamento transazioni Directa")
+            uploaded_directa = st.file_uploader(
+                "Carica file CSV transazioni Directa", 
+                type=['csv', 'txt'],
+                help="Seleziona il file CSV esportato dalla piattaforma Directa",
+                key="directa"
+            )
+            
+            if uploaded_directa is not None:
+                try:
+                    df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=',', encoding='cp1252')              
+                    df_directa = df_directa.replace([np.inf, -np.inf], None).fillna(0)
+                    df_directa.columns = [clean_col_name(col) for col in df_directa.columns] # ripulisce i caratteri speciali delle colonne
                     
-            except Exception as e:
-                st.error(f"❌ Errore nel caricamento del file: {str(e)}")
+                    from database import insert_directa_transaction  # Importa la funzione dal modulo database
+
+                    with st.spinner("⏳ Caricamento dati in corso..."):
+                        insert_directa_transaction(df_directa.to_dict('records'))
+                    st.success(f"✅ File caricato: {uploaded_directa.name}")
+                    st.write("**Anteprima dati (prime 5 righe):**")
+                    st.dataframe(df_directa.head(), width='stretch')
+                        
+                except Exception as e:
+                    st.error(f"❌ Errore nel caricamento del file: {str(e)}")
         
-        st.divider()
-        
-        st.subheader("Caricamento dettagli ETF")
-        uploaded_etf_details = st.file_uploader(
-            "Carica file CSV dettagli ETF", 
-            type=['csv'],
-            help="File con informazioni aggiuntive sugli ETF (ISIN, Settore, etc.)"
-        )
-        
-        if uploaded_etf_details is not None:
-            try:
-                from database import insert_holdings  # Importa la funzione dal modulo database
-                
-                df_details = pd.read_csv(uploaded_etf_details, sep=';',skiprows=7, encoding='latin-1')
-                 # Salva i dettagli caricati nello stato della sessione
-                st.session_state.etf_details = df_details
-                
-                etf_name = uploaded_etf_details.name.split('.')[0] # Nome etf preso dal nome del file
-                
-                with st.spinner("⏳ Caricamento dati in corso..."):
-                    insert_holdings(etf_name, df_details.to_dict('records'))
-                           
-                st.success(f"✅ File caricato: {uploaded_etf_details.name}")
-                st.write("**Anteprima dati:**")
-                st.dataframe(df_details.head(), width='stretch')
-            except Exception as e:
-                st.error(f"❌ Errore nel caricamento del file: {str(e)}")
+        with col_a2:
+            st.subheader("Caricamento dettagli ETF")
+            uploaded_etf_details = st.file_uploader(
+                "Carica file CSV dettagli ETF", 
+                type=['csv'],
+                help="File con informazioni aggiuntive sugli ETF (ISIN, Settore, etc.)"
+            )
+            
+            if uploaded_etf_details is not None:
+                try:
+                    from database import insert_holdings  # Importa la funzione dal modulo database
+                    
+                    df_details = pd.read_csv(uploaded_etf_details, sep=';',skiprows=7, encoding='latin-1')
+                    # Salva i dettagli caricati nello stato della sessione
+                    st.session_state.etf_details = df_details
+                    
+                    etf_name = uploaded_etf_details.name.split('.')[0] # Nome etf preso dal nome del file
+                    
+                    with st.spinner("⏳ Caricamento dati in corso..."):
+                        insert_holdings(etf_name, df_details.to_dict('records'))
+                            
+                    st.success(f"✅ File caricato: {uploaded_etf_details.name}")
+                    st.write("**Anteprima dati:**")
+                    st.dataframe(df_details.head(), width='stretch')
+                except Exception as e:
+                    st.error(f"❌ Errore nel caricamento del file: {str(e)}")
     
     with tab2:
         st.subheader("Configurazione Applicazione")
@@ -163,28 +165,7 @@ def render_impostazioni():
                     st.error(f"❌ Errore nel ripristino: {str(e)}")
         
         st.divider()
-        
-        st.subheader("⚡ Azioni Rapide")
-        
-        col_a1, col_a2 = st.columns(2)
-        
-        with col_a1:
-            if st.button("🔄 Aggiorna Prezzi Correnti", width='stretch'):
-                st.info("Funzionalità di aggiornamento prezzi in sviluppo...")
-        
-        with col_a2:
-            if st.button("🧹 Pulisci Dati Test", width='stretch'):
-                # Rimuove solo le transazioni di prova
-                original_len = len(st.session_state.etf_data)
-                st.session_state.etf_data = [
-                    t for t in st.session_state.etf_data 
-                    if not t.get('Transazione prova', False)
-                ]
-                new_len = len(st.session_state.etf_data)
-                save_etf_data(st.session_state.etf_data)
-                st.success(f"✅ Rimosse {original_len - new_len} transazioni di test")
-                st.rerun()
-        
+                
         # Reset completo (con conferma)
         st.divider()
         st.subheader("⚠️ Area Pericolosa")

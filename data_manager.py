@@ -18,5 +18,10 @@ def load_etf_details():
         return pd.read_csv(ETF_DETAILS_FILE)
     return pd.DataFrame()
 
+def load_etf_name():
+    from database import get_etf_list
+    etf_list = get_etf_list()
+    return etf_list
+
 def save_etf_details(df):
     df.to_csv(ETF_DETAILS_FILE, index=False)

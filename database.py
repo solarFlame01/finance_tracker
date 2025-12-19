@@ -81,7 +81,7 @@ def insert_directa_transaction(transaction_data):
             # ignore_duplicates=True: se trova un conflitto, NON aggiorna e NON dà errore, semplicemente ignora la riga.
             response = supabase.table("transaction").upsert(
                 batch_data, 
-                on_conflict="ticker, data_operazione, riferimento_ordine",  # <--- SOSTITUISCI con la tua colonna univoca (es. 'protocollo' o 'isin,riferimento_ordine')
+                on_conflict="ticker, data_operazione, riferimento_ordine, protocollo",
                 ignore_duplicates=True
             ).execute()
                  
@@ -90,7 +90,6 @@ def insert_directa_transaction(transaction_data):
             
         results = response
     return results
-
 
 # Funzione per inserire una lista di holding nel database
 def insert_holdings(etf_ticker, holdings):
@@ -139,6 +138,44 @@ def insert_holdings(etf_ticker, holdings):
         results.append(res)
     return results
 
+def get_etf_list():
+    """
+    Recupera tutti i ticker distinti dalla tabella "etf_holdings" nel database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti i ticker degli ETF
+    """
+    try:
+        response = supabase.table("unique_tickers_view").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero della lista ETF: {e}")
+        return []
+    
+def insert_update_etf_price(ticker, price):
+    """
+    Inserisce o aggiorna il prezzo di un ETF nella tabella "etf_prices".
+    
+    Parametri:
+        ticker (str): Il ticker dell'ETF
+        price (float): Il prezzo corrente dell'ETF
+    Ritorna:
+        response: Risultato dell'operazione di insert/update
+    """
+    try:
+        data = {
+            "ticker": ticker,
+            "price": price
+        }
+        response = supabase.table("etf_prices").upsert(
+            data, 
+            on_conflict="ticker"
+        ).execute()
+        return response
+    except Exception as e:
+        logging.error(f"Errore durante l'inserimento/aggiornamento del prezzo per {ticker}: {e}")
+        return None
+    
 # Test della funzione di inserimento dati ETF holdings
 if __name__ == "__main__":
     test_etf_ticker = "VWCE"
