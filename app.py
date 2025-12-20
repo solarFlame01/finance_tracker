@@ -25,8 +25,12 @@ if 'etf_data' not in st.session_state:
     st.session_state.etf_data = load_etf_data()
 
 if 'etf_details' not in st.session_state:
-    st.session_state.etf_details = load_etf_details()   
+    st.session_state.etf_details = load_etf_details()  
      
+if 'etf_transactions' not in st.session_state:
+    from database import get_etf_transaction_updated
+    st.session_state.etf_transactions = get_etf_transaction_updated()
+    
 # Navigazione principale con tab list
 def main():
     # Sidebar - Azioni Rapide sempre accessibili

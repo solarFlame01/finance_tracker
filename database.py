@@ -170,6 +170,20 @@ def get_etf_list():
         logging.error(f"Errore durante il recupero della lista ETF: {e}")
         return []
     
+def get_etf_transaction_updated():
+    """
+    Recupera tutte le transazioni con i relativi prezzi aggiornati e le % di crescita per singola transazione
+    
+    Ritorna:
+        list: Lista di dizionari contenenti ETF e dettagli di transazione
+    """
+    try:
+        response = supabase.table("etf_transaction_updated").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero della lista ETF: {e}")
+        return [] 
+       
 def insert_update_etf_price(ticker, price):
     """
     Inserisce o aggiorna il prezzo di un ETF nella tabella "etf_prices".
