@@ -156,6 +156,19 @@ def insert_holdings(etf_ticker, holdings):
         results.append(res)
     return results
 
+def get_portfolio_kpi_etf():
+    """
+    Recupera le KPI del portafoglio ETF dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti le KPI del portafoglio ETF
+    """
+    try:
+        response = supabase.table("v_portfolio_ticker_kpi").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero delle KPI del portafoglio ETF: {e}")
+        return []
 def get_etf_list():
     """
     Recupera tutti i ticker distinti dalla tabella "etf_holdings" nel database Supabase.
@@ -182,8 +195,90 @@ def get_etf_transaction_updated():
         return response.data
     except Exception as e:
         logging.error(f"Errore durante il recupero della lista ETF: {e}")
+        return []
+
+def get_top_3_etf():
+    """
+    Recupera i 3 ETF con le migliori performance dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti i top 3 ETF
+    """
+    try:
+        response = supabase.table("v_top_3_etf_guadagni").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dei top 3 ETF: {e}")
+        return []
+
+def get_bottom_3_etf():
+    """
+    Recupera i 3 ETF con le peggiori performance dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti i bottom 3 ETF
+    """
+    try:
+        response = supabase.table("v_bottom_3_etf_guadagni").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dei bottom 3 ETF: {e}")
         return [] 
-       
+def get_distribuzione_etf():
+    """
+    Recupera la distribuzione del portafoglio per ETF dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti la distribuzione per ETF
+    """
+    try:
+        response = supabase.table("v_dist_etf").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero della distribuzione ETF: {e}")
+        return []
+
+def get_distribuzione_settore():
+    """
+    Recupera la distribuzione del portafoglio per settore dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti la distribuzione per settore
+    """
+    try:
+        response = supabase.table("v_dist_settore").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero della distribuzione settore: {e}")
+        return []
+
+def get_distribuzione_valuta_mercato():
+    """
+    Recupera la distribuzione del portafoglio per valuta di mercato dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti la distribuzione per valuta di mercato
+    """
+    try:
+        response = supabase.table("v_dist_valuta_mercato").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero della distribuzione valuta mercato: {e}")
+        return []
+
+def get_distribuzione_area_geografica():
+    """
+    Recupera la distribuzione del portafoglio per area geografica dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti la distribuzione per area geografica
+    """
+    try:
+        response = supabase.table("v_dist_area_geografica").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero della distribuzione area geografica: {e}")
+        return []       
 def insert_update_etf_price(ticker, price):
     """
     Inserisce o aggiorna il prezzo di un ETF nella tabella "etf_prices".
@@ -259,3 +354,4 @@ if __name__ == "__main__":
         )
     else:
         print("Nessun dato trovato.")
+

@@ -30,7 +30,36 @@ if 'etf_details' not in st.session_state:
 if 'etf_transactions' not in st.session_state:
     from database import get_etf_transaction_updated
     st.session_state.etf_transactions = get_etf_transaction_updated()
+
+if 'bottom_3_etf' not in st.session_state:
+    from database import get_bottom_3_etf
+    st.session_state.bottom_3_etf = get_bottom_3_etf()
+
+if 'top_3_etf' not in st.session_state:
+    from database import get_top_3_etf
+    st.session_state.top_3_etf = get_top_3_etf()
+
+if 'portfolio_kpi_etf' not in st.session_state:
+    from database import get_portfolio_kpi_etf
+    st.session_state.kpi_etf = get_portfolio_kpi_etf()
+
+if 'distribuzione_etf' not in st.session_state:
+    from database import get_distribuzione_etf
+    st.session_state.distribuzione_etf = get_distribuzione_etf()
+
+if 'distribuzione_settore' not in st.session_state:
+    from database import get_distribuzione_settore
+    st.session_state.distribuzione_settore = get_distribuzione_settore()
+
+if 'distribuzione_valuta_mercato' not in st.session_state:
+    from database import get_distribuzione_valuta_mercato
+    st.session_state.distribuzione_valuta_mercato = get_distribuzione_valuta_mercato()
+
+if 'distribuzione_area_geografica' not in st.session_state:
+    from database import get_distribuzione_area_geografica
+    st.session_state.distribuzione_area_geografica = get_distribuzione_area_geografica()
     
+
 # Navigazione principale con tab list
 def main():
     # Sidebar - Azioni Rapide sempre accessibili

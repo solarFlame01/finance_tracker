@@ -31,47 +31,73 @@ def render_dashboard():
         # Tabella con dati recuperati dal database
         
         df_transaction = pd.DataFrame(st.session_state.etf_transactions)
+        # Esclude colonne non desiderate
+        df_transaction = df_transaction.drop(columns=[col for col in ["id", "created_at", "updated_at"] if col in df_transaction.columns], errors='ignore')
         st.dataframe(df_transaction, use_container_width=True)
-        colonne_disponibili = {
-            "Ticker": "Ticker",
-            "Quantità": "Quantità",
-            "Prezzo di acquisto": "Prezzo di acquisto",
-            "Prezzo corrente": "Prezzo corrente",
-            "Costo": "Costo",
-            "Market Value": "Market Value",
-            "Crescita %": "Crescita %",
-            "Valuta": "Valuta",
-            "Data acquisto": "Data acquisto",
-            "Emittente": "Emittente",
-            "ISIN": "ISIN"
-        }
         
-        # Filtra solo le colonne che esistono nel dataframe
-        colonne_esistenti = [col for col in colonne_disponibili.keys() 
-                           if colonne_disponibili[col] in df_transaction.columns]
+        df_bottom_3_etf = pd.DataFrame(st.session_state.bottom_3_etf)
+        st.dataframe(df_bottom_3_etf, use_container_width=True)
+
+        df_top_3_etf = pd.DataFrame(st.session_state.top_3_etf)
+        # Esclude colonne non desiderate
+        st.dataframe(df_top_3_etf, use_container_width=True)
         
-        if colonne_esistenti:
-            colonne_selezionate = st.multiselect(
-                "Seleziona colonne da visualizzare:",
-                options=colonne_esistenti,
-                default=colonne_esistenti[:min(8, len(colonne_esistenti))]
-            )
-            
-            # Mostra tabella
-            if colonne_selezionate:
-                df_display = df_transaction[[colonne_disponibili[col] for col in colonne_selezionate]]
-                st.dataframe(df_display, height=400)
-            
-            # Grafico a barre per performance
-            st.subheader("Performance per ETF")
-            fig = go.Figure(data=[
-                go.Bar(name='Costo', x=df_transaction['Ticker'], y=df_transaction['Costo']),
-                go.Bar(name='Valore Mercato', x=df_transaction['Ticker'], y=df_transaction['Market Value'])
-            ])
-            fig.update_layout(barmode='group', height=400)
-            st.plotly_chart(fig, width='stretch')
-        else:
-            st.warning("Nessuna colonna disponibile da visualizzare.")
+        df_portfolio_kpi_etf = pd.DataFrame(st.session_state.kpi_etf)
+        # Esclude colonne non desiderate
+        st.dataframe(df_portfolio_kpi_etf, use_container_width=True)
+        
+        # Diagrammi a torta
+        st.subheader("Analisi Portfolio")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.session_state.distribuzione_etf:
+                df_dist_etf = pd.DataFrame(st.session_state.distribuzione_etf)
+                if not df_dist_etf.empty:
+                    fig1 = go.Figure(data=[go.Pie(
+                        labels=df_dist_etf['ticker'],           
+                        values=df_dist_etf['distribuzione_pct'], 
+                    )])
+                    fig1.update_layout(title="Distribuzione per ETF", height=400)
+                    st.plotly_chart(fig1, use_container_width=True)
+        
+        with col2:
+            # Pie chart: Distribuzione per Settore
+            if st.session_state.distribuzione_settore:
+                df_dist_settore = pd.DataFrame(st.session_state.distribuzione_settore)
+                if not df_dist_settore.empty:
+                    fig2 = go.Figure(data=[go.Pie(
+                        labels=df_dist_settore['settore'],
+                        values=df_dist_settore['distribuzione_pct'],
+                    )])
+                    fig2.update_layout(title="Distribuzione per Settore", height=400)
+                    st.plotly_chart(fig2, use_container_width=True)
+        
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            # Pie chart: Distribuzione per Valuta di Mercato
+            if st.session_state.distribuzione_valuta_mercato:
+                df_dist_valuta = pd.DataFrame(st.session_state.distribuzione_valuta_mercato)
+                if not df_dist_valuta.empty:
+                    fig3 = go.Figure(data=[go.Pie(
+                        labels=df_dist_valuta['valuta_mercato'],
+                        values=df_dist_valuta['distribuzione_pct'],
+                    )])
+                    fig3.update_layout(title="Distribuzione per Valuta di Mercato", height=400)
+                    st.plotly_chart(fig3, use_container_width=True)
+        
+        with col4:
+            # Pie chart: Distribuzione per Area Geografica
+            if st.session_state.distribuzione_area_geografica:
+                df_dist_area = pd.DataFrame(st.session_state.distribuzione_area_geografica)
+                if not df_dist_area.empty:
+                    fig4 = go.Figure(data=[go.Pie(
+                        labels=df_dist_area['area_geografica'],
+                        values=df_dist_area['distribuzione_pct'],
+                    )])
+                    fig4.update_layout(title="Distribuzione per Area Geografica", height=400)
+                    st.plotly_chart(fig4, use_container_width=True)
         
     else:
         # Tabella con dati finti
