@@ -60,42 +60,198 @@ if 'distribuzione_area_geografica' not in st.session_state:
     st.session_state.distribuzione_area_geografica = get_distribuzione_area_geografica()
     
 
-# Navigazione principale con tab list
+# Navigazione principale con sidebar menu
 def main():
-    # Sidebar - Azioni Rapide sempre accessibili
-    render_sidebar()
+    # Inizializzazione session state per la pagina attiva
+    if 'page' not in st.session_state:
+        st.session_state.page = "dashboard"
     
-    # Header dell'applicazione
-    col_logo, col_title = st.columns([1, 5])
-    st.title("ETF Portfolio Tracker")
+    # Stili CSS per la sidebar moderna
+    st.markdown("""
+    <style>
+        /* Stili generali sidebar */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        }
         
-    # Tab list principale
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "📊 Dashboard",
-        "📝 Gestione ETF", 
-        "📐 Metriche",
-        "📅 Rendimento Annuo",
-        "⚙️ Impostazioni",
-        "🔮 simula ETF"
-    ])
+        /* Header sidebar */
+        .sidebar-header {
+            font-size: 1.6em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Menu buttons - stile moderno */
+        .menu-button {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        
+        .menu-button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            color: #ffffff;
+        }
+        
+        .menu-button:active {
+            transform: translateX(3px);
+        }
+        
+        /* Separatore */
+        .sidebar-divider {
+            margin: 25px 0;
+            border-top: 2px solid rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Titolo sezione azioni rapide */
+        .quick-actions-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-left: 5px;
+        }
+        
+        /* Azioni rapide */
+        .action-button {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #cbd5e1;
+            border: 1.5px solid rgba(102, 126, 234, 0.2);
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        
+        .action-button:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        .action-button:active {
+            background: rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Nascondere i pulsanti di default di streamlit e farli riapparire al hover */
+        button[kind="secondary"] {
+            transition: all 0.3s ease;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    # Contenuto delle tab
-    with tab1:
+    # Sidebar - Menu Principale e Azioni Rapide
+    with st.sidebar:
+        st.markdown("<div class='sidebar-header'>🚀 ETF Tracker</div>", unsafe_allow_html=True)
+        
+        st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
+        
+        # Menu principale con stili personalizzati
+        st.markdown("<p style='color: #94a3b8; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 5px;'>Navigazione</p>", unsafe_allow_html=True)
+        
+        col_menu = st.columns(1)
+        
+        if st.button("📊 Dashboard", use_container_width=True, key="btn_dashboard", help="Vai al Dashboard"):
+            st.session_state.page = "dashboard"
+        
+        if st.button("📝 Gestione ETF", use_container_width=True, key="btn_gestione", help="Gestisci i tuoi ETF"):
+            st.session_state.page = "gestione_etf"
+        
+        if st.button("📐 Metriche", use_container_width=True, key="btn_metriche", help="Visualizza le metriche"):
+            st.session_state.page = "metriche"
+        
+        if st.button("📅 Rendimento Annuo", use_container_width=True, key="btn_rendimento", help="Rendimento per anno"):
+            st.session_state.page = "rendimento_annuo"
+        
+        if st.button("⚙️ Impostazioni", use_container_width=True, key="btn_impostazioni", help="Configura l'app"):
+            st.session_state.page = "impostazioni"
+        
+        if st.button("🔮 Simula ETF", use_container_width=True, key="btn_simula", help="Simula investimenti"):
+            st.session_state.page = "simula_etf"
+        
+        st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
+        
+        # Azioni Rapide
+        st.markdown("<div class='quick-actions-title'>⚡ Azioni Rapide</div>", unsafe_allow_html=True)
+                
+        if st.button("🔄 Aggiorna Prezzi", use_container_width=True, key="btn_update_prices"):
+                from database import get_etf_list, insert_update_etf_price
+                from finance_info import get_etf_price
+                import logging
+                
+                logger = logging.getLogger(__name__)
+                logger.info("Inizio aggiornamento prezzi ETF")
+                
+                etf_list = get_etf_list()
+                logger.info(f"Trovati {len(etf_list)} ETF da aggiornare")
+                
+                success_count = 0
+                for etf in etf_list:
+                    etf_ticker = etf.get('etf_ticker') if isinstance(etf, dict) else etf
+                    logger.debug(f"Elaborazione ETF: {etf_ticker}")
+                    
+                    price = get_etf_price(etf_ticker)
+                    if price is not None:
+                        response = insert_update_etf_price(etf_ticker, price)
+                        if response is not None:
+                            logger.info(f"Prezzo aggiornato: {etf_ticker} = {price}")
+                            success_count += 1
+                        else:
+                            st.error(f"❌ Impossibile aggiornare il prezzo per {etf_ticker}")
+                            logger.error(f"Errore DB per {etf_ticker}")
+                    else:
+                        st.error(f"❌ Impossibile recuperare il prezzo per {etf_ticker}")
+                        logger.warning(f"Prezzo non disponibile per {etf_ticker}")
+                
+                st.success(f"✅ Prezzi aggiornati")
+                logger.info(f"Aggiornamento completato: {success_count}/{len(etf_list)} successi")
+        
+        if st.button("🧹 Pulisci Directa", use_container_width=True, key="btn_clean_directa"):
+                st.info("Funzionalità per cancellare dati Directa in sviluppo...")
+        
+        if st.button("🧹 Pulisci ETF", use_container_width=True, key="btn_clean_etf"):
+            st.info("Funzionalità per cancellare dati ETF in sviluppo...")
+    
+    # Routing basato sulla pagina selezionata
+    if st.session_state.page == "dashboard":
         render_dashboard()
-    
-    with tab2:
+    elif st.session_state.page == "gestione_etf":
         render_gestione_etf()
-    
-    with tab3:
+    elif st.session_state.page == "metriche":
         render_metriche()
-    
-    with tab4:
+    elif st.session_state.page == "rendimento_annuo":
         render_rendimento_annuo()
-    
-    with tab5:
+    elif st.session_state.page == "impostazioni":
         render_impostazioni()
-    
-    with tab6:
+    elif st.session_state.page == "simula_etf":
         render_simula_etf()
         
     # Footer
