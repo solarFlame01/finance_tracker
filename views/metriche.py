@@ -3,7 +3,14 @@ import plotly.graph_objects as go
 # Sezione Metriche (placeholder)
 def render_metriche():
     st.header("📐 Metriche Avanzate")
-    
+    if st.button("🔄 Aggiorna Storico", use_container_width=True):
+        from finance_info import get_all_etf_history
+        from database import get_etf_list
+        
+        etf_list = get_etf_list()
+        for etf in etf_list:
+            get_all_etf_history(str(etf['etf_ticker']))
+        st.success("✅ Storico aggiornato per tutti gli ETF")
     with st.container():
         st.info("🚧 Sezione in costruzione - Disponibile nella prossima versione")
         

@@ -192,7 +192,7 @@ L'app calcola automaticamente:
 - **Sidebar:** Navigazione main con selectbox radio
 - **Layout:** Wide mode per migliore visualizzazione tabelle
 - **Colonne:** Uso di `st.columns()` per layout responsive
-- **Tabelle:** `st.dataframe()` con `use_container_width=True`
+- **Tabelle:** `st.dataframe()` con `width="stretch"`
 - **Metriche:** `st.metric()` per visualizzare valori principali
 - **Messaggi:** Info, success, warning, error con icone emoji
 

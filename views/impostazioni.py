@@ -14,7 +14,7 @@ def render_impostazioni():
     st.header("⚙️ Impostazioni")
     
     # Tabs per impostazioni
-    tab1, tab2, tab3 = st.tabs(["📁 Importazione Dati", "🔧 Configurazione", "💾 Backup & Ripristino"])
+    tab1, tab3 = st.tabs(["📁 Importazione Dati", "💾 Backup & Ripristino"])
     
     with tab1:
         col_a1, col_a2 = st.columns(2)
@@ -44,7 +44,10 @@ def render_impostazioni():
                         
                 except Exception as e:
                     st.error(f"❌ Errore nel caricamento del file: {str(e)}")
-        
+                    
+            if st.button("🧹 Pulisci Dati Directa", width='stretch'):
+                    # Rimuove solo le transazioni di prova
+                    st.info("Funzionalità per cancellare dati Directa in sviluppo...")
         with col_a2:
             st.subheader("Caricamento dettagli ETF")
             uploaded_etf_details = st.file_uploader(
@@ -71,43 +74,9 @@ def render_impostazioni():
                     st.dataframe(df_details.head(), width='stretch')
                 except Exception as e:
                     st.error(f"❌ Errore nel caricamento del file: {str(e)}")
-    
-    with tab2:
-        st.subheader("Configurazione Applicazione")
-        
-        # Tema
-        tema = st.selectbox(
-            "Tema dell'interfaccia",
-            ["Light", "Dark", "Auto"],
-            index=2,
-            help="Seleziona il tema preferito"
-        )
-        
-        # Valuta predefinita
-        valuta_default = st.selectbox(
-            "Valuta predefinita",
-            ["EUR", "USD", "GBP", "CHF"],
-            index=0
-        )
-        
-        # Formato data
-        formato_data = st.selectbox(
-            "Formato data",
-            ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"],
-            index=0
-        )
-        
-        # Numero decimali
-        decimali = st.slider(
-            "Numero di decimali per prezzi",
-            min_value=2,
-            max_value=6,
-            value=4
-        )
-        
-        # Salva configurazione
-        if st.button("Salva Configurazione", type="primary"):
-            st.success("Configurazione salvata (funzionalità completa in sviluppo)")
+                    
+            if st.button("🧹 Pulisci Dati ETF", width='stretch'):
+                st.info("Funzionalità per cancellare dati ETF in sviluppo...")
     
     with tab3:
         st.subheader("Backup Dati")

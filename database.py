@@ -169,6 +169,7 @@ def get_portfolio_kpi_etf():
     except Exception as e:
         logging.error(f"Errore durante il recupero delle KPI del portafoglio ETF: {e}")
         return []
+
 def get_etf_list():
     """
     Recupera tutti i ticker distinti dalla tabella "etf_holdings" nel database Supabase.
@@ -278,7 +279,22 @@ def get_distribuzione_area_geografica():
         return response.data
     except Exception as e:
         logging.error(f"Errore durante il recupero della distribuzione area geografica: {e}")
-        return []       
+        return []  
+    
+def get_prezzo_medio_acquisto():
+    """
+    Recupera il prezzo medio di acquisto per ETF dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti il prezzo medio di acquisto per ETF
+    """
+    try:
+        response = supabase.table("v_portfolio_positions").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del prezzo medio di acquisto: {e}")
+        return []   
+      
 def insert_update_etf_price(ticker, price):
     """
     Inserisce o aggiorna il prezzo di un ETF nella tabella "etf_prices".
@@ -303,6 +319,49 @@ def insert_update_etf_price(ticker, price):
         logging.error(f"Errore durante l'inserimento/aggiornamento del prezzo per {ticker}: {e}")
         return None
     
+def insert_etf_history(history_df):
+    """
+    Inserisce lo storico dei prezzi di un ETF nella tabella "etf_price_history".
+    
+    Parametri:
+        ticker (str): Il ticker dell'ETF
+        history_df (DataFrame): DataFrame contenente lo storico dei prezzi con colonne 'date' e 'close'
+    Ritorna:
+        response: Risultato dell'operazione di insert
+    """
+    try:
+        batch_data = []
+        for _, row in history_df.iterrows():
+            data = {
+                "ticker": row['ticker'],
+                "date": row['date'].strftime("%Y-%m-%d"),
+                "close": row['close']
+            }
+            batch_data.append(data)
+        
+        if batch_data:
+            response = supabase.table("etf_price_history").upsert(
+                batch_data, 
+                on_conflict="ticker, date, close"
+            ).execute()
+            return response
+    except Exception as e:
+        logging.error(f"Errore durante l'inserimento dello storico")
+        return None
+def insert_update_etf_transaction(nuova_transazione):
+    """
+    Inserisce o aggiorna il prezzo
+    """
+    try:
+        response = supabase.table("transaction").upsert(
+        nuova_transazione, 
+            on_conflict="data_operazione, ticker, riferimento_ordine, protocollo"
+        ).execute()
+        return response
+    except Exception as e:
+        logging.error(f"Errore durante l'inserimento/aggiornamento del prezzo")
+        return None
+
 # Test della funzione di inserimento dati ETF holdings
 if __name__ == "__main__":
     test_etf_ticker = "VWCE"

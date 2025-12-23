@@ -48,15 +48,24 @@ def render_dashboard():
     apply_dashboard_styling()
     
     st.markdown("<h1 style='text-align: center; margin-bottom: 30px;'>📊 Dashboard Portafoglio ETF</h1>", unsafe_allow_html=True)
-    
+    st.markdown("""
+    <style>
+            .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+                font-size: 17px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
     if st.session_state.etf_transactions:
         # Tab per organizzare le sezioni
-        tab1, tab2, tab3 = st.tabs(["📈 Riepilogo", "📊 Analisi", "📋 Dettagli"])
+        tab1, tab2, tab4, tab5, tab6, tab7 = st.tabs(["📈 Riepilogo", "📊 Analisi", "⚙️ Impostazioni", "🎯 Metriche", "➕ Inserisci Transazione", "🏆 Rendimento annuo"])
         
         # ===== TAB 1: RIEPILOGO =====
         with tab1:
             st.markdown("<div class='section-title'>💰 Statistiche Portafoglio</div>", unsafe_allow_html=True)
-            
+            if st.button("🔄 Aggiorna Prezzi", use_container_width=True):
+                from finance_info import aggiorna_prezzi_eft
+                aggiorna_prezzi_eft()
             # Calcolo metriche
             df_transaction = pd.DataFrame(st.session_state.etf_transactions)
             costo_totale = df_transaction['Costo'].sum() if 'Costo' in df_transaction.columns else 0
@@ -67,10 +76,10 @@ def render_dashboard():
             # Metriche in colonne
             col1, col2, col3, col4 = st.columns(4, gap="medium")
             with col1:
-                st.metric("💵 Totale Investito", f"€{costo_totale:,.2f}", delta=None)
-            with col2:
                 st.metric("📍 Valore di Mercato", f"€{market_value_totale:,.2f}", 
                          delta=f"€{crescita_totale:,.2f}" if crescita_totale != 0 else None)
+            with col2:
+                st.metric("💵 Totale Investito", f"€{costo_totale:,.2f}", delta=None)
             with col3:
                 color = "🟢" if crescita_totale >= 0 else "🔴"
                 st.metric(f"{color} Guadagno/Perdita", f"€{crescita_totale:,.2f}")
@@ -80,19 +89,95 @@ def render_dashboard():
             
             st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
             
+            # ===== Tabella prezzo medio di acquisto =====
+            st.markdown("<div class='section-title'>📍 Prezzo Medio di Acquisto</div>", unsafe_allow_html=True)
+            df_prezzo_medio_acquisto = pd.DataFrame(st.session_state.prezzo_medio_acquisto)
+            df_prezzo_medio_acquisto["diff_prezzo"] = (
+                df_prezzo_medio_acquisto["price"]
+                - df_prezzo_medio_acquisto["prezzo_medio_acquisto"]
+            ).round(2)
+            # Applica colori alla colonna Crescita %
+            def color_crescita(val):
+                if isinstance(val, (int, float)):
+                    if val > 0:
+                        return 'background-color: #90EE90'
+                    elif val < 0:
+                        return 'background-color: #FFB6C6'
+                return ''
+            
+            if 'diff_prezzo' in df_prezzo_medio_acquisto.columns:
+                df_prezzo_medio_acquisto_styled = (
+                    df_prezzo_medio_acquisto.style
+                    .map(color_crescita, subset=['diff_prezzo'])
+                    .format({
+                        'diff_prezzo': '{:.2f}',
+                        'costo_investito_eur': '{:.2f}',
+                        'prezzo_medio_acquisto': '{:.2f}',
+                        'price': '{:.2f}'
+                    })
+                )
+            st.dataframe(df_prezzo_medio_acquisto_styled, width="stretch", height=400, 
+                         column_order=["ticker", "quantita", "costo_investito_eur", "prezzo_medio_acquisto", "price", "diff_prezzo", "ultima_operazione"],
+            column_config={
+                "ticker": st.column_config.TextColumn("Ticker"),
+                "quantita": st.column_config.NumberColumn("Quantità"),
+                "costo_investito_eur": st.column_config.NumberColumn("Costo Investito €"),
+                "prezzo_medio_acquisto": st.column_config.NumberColumn("Prezzo Medio Acquisto €"),
+                "price": st.column_config.NumberColumn("Prezzo Corrente €"),
+                "diff_prezzo": st.column_config.NumberColumn("Differenza Prezzo €"),
+                "ultima_operazione": st.column_config.TextColumn("Ultima Operazione")
+            })
+            
             # Tabella principale con stile
             st.markdown("<div class='section-title'>📍 Posizioni Attuali</div>", unsafe_allow_html=True)
             df_transaction_display = df_transaction.drop(
                 columns=[col for col in ["id", "created_at", "updated_at"] if col in df_transaction.columns], 
                 errors='ignore'
             )
-            st.dataframe(df_transaction_display, use_container_width=True, height=400)
+            
+            
+            if 'Crescita %' in df_transaction_display.columns:
+                styled_df = (
+                    df_transaction_display.style
+                    .map(color_crescita, subset=['Crescita %'])
+                    .format({
+                        'Crescita %': '{:.2f}',
+                        'Prezzo di acquisto': '{:.2f}',
+                        'Prezzo corrente': '{:.2f}',
+                        'Costo': '{:.2f}',
+                        'Market Value': '{:.2f}'
+                    })
+                )
+
+                st.dataframe(styled_df, width="stretch", height=400)
+            else:
+                st.dataframe(df_transaction_display, width="stretch", height=400)
+
         
         # ===== TAB 2: ANALISI =====
         with tab2:
             st.markdown("<div class='section-title'>🎯 Analisi Portfolio</div>", unsafe_allow_html=True)
             st.markdown("<p style='color: #666; margin-bottom: 20px;'>Distribuzione degli investimenti per diverse dimensioni</p>", unsafe_allow_html=True)
             
+            
+            # ETF con migliore e peggiore performance
+            col1, col2 = st.columns(2, gap="large")
+            
+            with col1:
+                with st.expander("🏆 Top 3 ETF (Migliori Performance)", expanded=True):
+                    df_top_3_etf = pd.DataFrame(st.session_state.top_3_etf)
+                    if not df_top_3_etf.empty:
+                        st.dataframe(df_top_3_etf, width="stretch")
+                    else:
+                        st.info("Nessun dato disponibile")
+            
+            with col2:
+                with st.expander("📉 Bottom 3 ETF (Peggiori Performance)", expanded=True):
+                    df_bottom_3_etf = pd.DataFrame(st.session_state.bottom_3_etf)
+                    if not df_bottom_3_etf.empty:
+                        st.dataframe(df_bottom_3_etf, width="stretch")
+                    else:
+                        st.info("Nessun dato disponibile")
             # Grafici in layout 2x2
             col1, col2 = st.columns(2, gap="large")
             
@@ -104,6 +189,9 @@ def render_dashboard():
                         fig1 = go.Figure(data=[go.Pie(
                             labels=df_dist_etf['ticker'],           
                             values=df_dist_etf['distribuzione_pct'],
+                            textinfo='label+percent',  # cosa mostrare
+                            textposition='auto',     # fuori dalla fetta
+                            textfont=dict(size=12),     # grandezza testo
                             hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"
                         )])
                         fig1.update_layout(
@@ -112,7 +200,7 @@ def render_dashboard():
                             showlegend=True,
                             margin=dict(t=10, b=10)
                         )
-                        st.plotly_chart(fig1, use_container_width=True)
+                        st.plotly_chart(fig1, width="stretch")
             
             with col2:
                 st.markdown("<div class='subsection-title'>Settore</div>", unsafe_allow_html=True)
@@ -120,17 +208,21 @@ def render_dashboard():
                     df_dist_settore = pd.DataFrame(st.session_state.distribuzione_settore)
                     if not df_dist_settore.empty:
                         fig2 = go.Figure(data=[go.Pie(
-                            labels=df_dist_settore['settore'],
-                            values=df_dist_settore['distribuzione_pct'],
-                            hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"
-                        )])
+                        labels=df_dist_settore['settore'],
+                        values=df_dist_settore['distribuzione_pct'],
+                        textinfo='label+percent',  # cosa mostrare
+                        textposition='auto',     # fuori dalla fetta
+                        textfont=dict(size=12),     # grandezza testo
+                        hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"
+                    )])
+
                         fig2.update_layout(
                             title="",
                             height=400,
                             showlegend=True,
                             margin=dict(t=10, b=10)
                         )
-                        st.plotly_chart(fig2, use_container_width=True)
+                        st.plotly_chart(fig2, width="stretch")
             
             col3, col4 = st.columns(2, gap="large")
             
@@ -142,6 +234,9 @@ def render_dashboard():
                         fig3 = go.Figure(data=[go.Pie(
                             labels=df_dist_valuta['valuta_mercato'],
                             values=df_dist_valuta['distribuzione_pct'],
+                            textinfo='label+percent',  # cosa mostrare
+                            textposition='auto',     # fuori dalla fetta
+                            textfont=dict(size=12),     # grandezza testo
                             hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"
                         )])
                         fig3.update_layout(
@@ -150,7 +245,7 @@ def render_dashboard():
                             showlegend=True,
                             margin=dict(t=10, b=10)
                         )
-                        st.plotly_chart(fig3, use_container_width=True)
+                        st.plotly_chart(fig3, width="stretch")
             
             with col4:
                 st.markdown("<div class='subsection-title'>Area Geografica</div>", unsafe_allow_html=True)
@@ -160,6 +255,9 @@ def render_dashboard():
                         fig4 = go.Figure(data=[go.Pie(
                             labels=df_dist_area['area_geografica'],
                             values=df_dist_area['distribuzione_pct'],
+                            textinfo='label+percent',  # cosa mostrare
+                            textposition='auto',     # fuori dalla fetta
+                            textfont=dict(size=12),     # grandezza testo
                             hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"
                         )])
                         fig4.update_layout(
@@ -168,40 +266,51 @@ def render_dashboard():
                             showlegend=True,
                             margin=dict(t=10, b=10)
                         )
-                        st.plotly_chart(fig4, use_container_width=True)
-        
-        # ===== TAB 3: DETTAGLI =====
-        with tab3:
-            st.markdown("<div class='section-title'>📊 Analisi Dettagliata</div>", unsafe_allow_html=True)
+                        st.plotly_chart(fig4, width="stretch")
             
-            # ETF con migliore e peggiore performance
-            col1, col2 = st.columns(2, gap="large")
-            
-            with col1:
-                with st.expander("🏆 Top 3 ETF (Migliori Performance)", expanded=True):
-                    df_top_3_etf = pd.DataFrame(st.session_state.top_3_etf)
-                    if not df_top_3_etf.empty:
-                        st.dataframe(df_top_3_etf, use_container_width=True)
-                    else:
-                        st.info("Nessun dato disponibile")
-            
-            with col2:
-                with st.expander("📉 Bottom 3 ETF (Peggiori Performance)", expanded=True):
-                    df_bottom_3_etf = pd.DataFrame(st.session_state.bottom_3_etf)
-                    if not df_bottom_3_etf.empty:
-                        st.dataframe(df_bottom_3_etf, use_container_width=True)
-                    else:
-                        st.info("Nessun dato disponibile")
-            
+            # Grafico a barre: Confronto Costo vs Market Value
             st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+            st.markdown("<div class='section-title'>📊 Confronto Costo vs Market Value per ETF</div>", unsafe_allow_html=True)
             
-            with st.expander("📈 KPI Portfolio", expanded=False):
-                df_portfolio_kpi_etf = pd.DataFrame(st.session_state.kpi_etf)
-                if not df_portfolio_kpi_etf.empty:
-                    st.dataframe(df_portfolio_kpi_etf, use_container_width=True)
-                else:
-                    st.info("Nessun dato disponibile")
+            if st.session_state.kpi_etf:
+                df_kpi_chart = pd.DataFrame(st.session_state.kpi_etf)
+                if not df_kpi_chart.empty and 'ticker' in df_kpi_chart.columns and 'costo_investito_eur' in df_kpi_chart.columns and 'market_value_attuale' in df_kpi_chart.columns:
+                    df_chart_bars = df_kpi_chart[['ticker', 'costo_investito_eur', 'market_value_attuale']].copy()
+                    df_chart_bars = (
+                        df_chart_bars
+                        .set_index("ticker")
+                        .filter(regex=r"^(?!M\.).*", axis=0)
+                        .reset_index()
+                    )
+                    
+                    fig_bars = go.Figure(
+                        data=[
+                            go.Bar(x=df_chart_bars['ticker'], y=df_chart_bars['costo_investito_eur'], 
+                                name='Costo Investito (EUR)', marker_color='red'),
+                            go.Bar(x=df_chart_bars['ticker'], y=df_chart_bars['market_value_attuale'], 
+                                name='Market Value Attuale', marker_color='green')
+                        ]
+                    )
+                    fig_bars.update_layout(barmode='group', height=400)
+                    st.plotly_chart(fig_bars, width="stretch")
         
+        # ===== TAB 4: IMPOSTAZIONI =====
+        with tab4:
+            from views.impostazioni import render_impostazioni
+            render_impostazioni()
+        # ==== TAB METRICHE ====
+        with tab5:
+            from views.metriche import render_metriche
+            render_metriche()
+        # ==== TAB INSERISCI TRANSAZIONE ====
+        with tab6:
+            from views.gestione_eft import render_gestione_etf
+            render_gestione_etf()
+        # ==== TAB RENDIMENTO ANNUO ====
+        with tab7:
+            from views.rendimento_annuo import render_rendimento_annuo
+            render_rendimento_annuo()
+    
     else:
         # Sezione quando non ci sono transazioni
         st.markdown("<div style='text-align: center; padding: 40px;'>", unsafe_allow_html=True)
@@ -240,7 +349,7 @@ def render_dashboard():
         }
         
         df_finti = pd.DataFrame(data_finti)
-        st.dataframe(df_finti, use_container_width=True, height=400)
+        st.dataframe(df_finti, width="stretch", height=400)
         
         st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
         

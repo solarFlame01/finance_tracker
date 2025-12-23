@@ -1,6 +1,103 @@
 import yfinance as yf
 from datetime import datetime
+import pandas as pd
+import streamlit as st
 
+def aggiorna_prezzi_eft():
+    """
+    Aggiorna i prezzi correnti di tutti gli ETF
+    """
+    from database import get_etf_list, insert_update_etf_price
+    from finance_info import get_etf_price
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    logger.info("Inizio aggiornamento prezzi ETF")
+    
+    etf_list = get_etf_list()
+    logger.info(f"Trovati {len(etf_list)} ETF da aggiornare")
+    
+    success_count = 0
+    for etf in etf_list:
+        etf_ticker = etf.get('etf_ticker') if isinstance(etf, dict) else etf
+        logger.debug(f"Elaborazione ETF: {etf_ticker}")
+        
+        price = get_etf_price(etf_ticker)
+        if price is not None:
+            response = insert_update_etf_price(etf_ticker, price)
+            if response is not None:
+                logger.info(f"Prezzo aggiornato: {etf_ticker} = {price}")
+                success_count += 1
+            else:
+                st.error(f"❌ Impossibile aggiornare il prezzo per {etf_ticker}")
+                logger.error(f"Errore DB per {etf_ticker}")
+        else:
+            st.error(f"❌ Impossibile recuperare il prezzo per {etf_ticker}")
+            logger.warning(f"Prezzo non disponibile per {etf_ticker}")
+    
+    st.success(f"✅ Prezzi aggiornati")
+    st.rerun()
+    logger.info(f"Aggiornamento completato: {success_count}/{len(etf_list)} successi")
+    
+def get_all_etf_history(ticker: str, interval: str = "1d") -> pd.DataFrame:
+    """
+    Recupera lo storico COMPLETO prezzi (e dividendi) da Yahoo Finance
+    provando prima .MI, poi .DE, poi senza suffix.
+    
+    Args:
+        ticker: Base ticker (es: 'CSPX', 'EIMI')
+        interval: es. '1d', '1wk', '1mo'
+    
+    Returns:
+        DataFrame con colonne: ['ticker','date','close','dividends']
+    """
+    # Lista di suffix da provare (in ordine di priorità)
+    suffixes = ['.MI', '.DE', '.L', '.AS']  # Aggiunto .L (London), .AS (Amsterdam)
+    
+    for suffix in suffixes + [None]:  # + None per ticker "puro"
+        try:
+            full_ticker = f"{ticker}{suffix}" if suffix else ticker
+            print(f"🔍 Provo ticker: {full_ticker}")
+            
+            etf = yf.Ticker(full_ticker)
+            history = etf.history(
+                period="max",
+                interval=interval,
+                auto_adjust=False
+            )
+
+            if history is None or history.empty:
+                print(f"📭 Nessun dato per {full_ticker}, passo al successivo...")
+                continue  # Prova prossimo suffix invece di return
+
+            history = history.reset_index()
+            
+            df = pd.DataFrame({
+                "ticker": ticker,  # Salva solo base ticker, non suffix
+                "date": history["Date"].dt.date,  # Normalizza a date
+                "close": history["Close"],
+                "dividends": history["Dividends"].fillna(0.0)  # Colonna corretta
+            }).dropna(subset=["close"])  # Rimuovi righe senza prezzo
+            
+            print(f"✅ Dati trovati per {full_ticker}: {len(df)} righe")
+            
+            # Salva in DB (opzionale)
+            try:
+                from database import insert_etf_history
+                insert_etf_history(df)
+            except Exception as db_e:
+                print(f"⚠️ Errore DB per {ticker}: {str(db_e)}")
+            
+            return df
+            
+        except Exception as e:
+            print(f"❌ Errore {full_ticker}: {str(e)}")
+            continue  # Prova prossimo suffix
+    
+    # Se nessuno funziona
+    print(f"💥 Nessun ticker valido trovato per '{ticker}'")
+    return pd.DataFrame(columns=["ticker", "date", "close", "dividends"])
+    
 def get_etf_price(ticker):
     """
     Recupera il prezzo corrente di un ETF da Yahoo Finance.
@@ -98,5 +195,5 @@ prezzo = get_etf_price('CSPXJ.MI')
 print(f"Prezzo CSPXJ: €{prezzo}")
 
 # Ottenere informazioni complete
-info = get_etf_info('EIMI.MI')
+info = get_all_etf_history('EIMI.MI')
 print(info)'''
