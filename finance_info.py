@@ -2,6 +2,7 @@ import yfinance as yf
 from datetime import datetime
 import pandas as pd
 import streamlit as st
+import numpy as np
 
 def aggiorna_prezzi_eft():
     """
@@ -237,6 +238,43 @@ def get_etf_info(ticker):
     except Exception as e:
         print(f"❌ Errore nel recupero delle informazioni per {ticker}: {str(e)}")
         return None
+
+def get_etf_volatility(ticker: str, period: str = "10y") -> float:
+    """
+    Calcola la volatilità annualizzata di un ETF basata sugli ultimi 5 anni di dati.
+
+    Args:
+        ticker (str): Il ticker dell'ETF (es: 'VWCE.MI').
+
+    Returns:
+        float: La volatilità annualizzata, o None se non è possibile calcolarla.
+    """
+    try:
+        # Scarica dati reali
+        data = yf.download(ticker, period=period, progress=False)
+        if data is None:
+            print(f"Nessun dato trovato per {ticker}")
+            return 0
+
+        if data.empty:
+            print(f"Nessun dato storico trovato per {ticker}")
+            return 0
+
+        # Calcola i ritorni giornalieri
+        returns = data['Close'].pct_change().dropna()
+        if returns.empty:
+            print(f"Non è possibile calcolare i ritorni per {ticker}")
+            return 0
+
+        # Calcola la volatilità annualizzata (252 giorni di trading in un anno)
+        volatility = returns.std() * np.sqrt(252)
+        print(f"Volatilità reale {ticker}: {volatility[0]:.3f}")
+        return volatility[0] * 100
+    except Exception as e:
+        print(f"Errore durante il calcolo della volatilità per {ticker}: {e}")
+        return 0
+
+print(3.5/get_etf_volatility('IWQU.MI'))
 '''# Ottenere il prezzo corrente
 prezzo = get_etf_price('CSPXJ.MI')
 print(f"Prezzo CSPXJ: €{prezzo}")
