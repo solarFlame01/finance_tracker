@@ -279,7 +279,21 @@ def get_distribuzione_area_geografica():
         return response.data
     except Exception as e:
         logging.error(f"Errore durante il recupero della distribuzione area geografica: {e}")
-        return []  
+        return [] 
+     
+def get_etf_history():
+    """
+    Recupera lo storico dei prezzi degli ETF dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti lo storico per ETF
+    """
+    try:
+        response = supabase.table("etf_price_history").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dello storico ETF: {e}")
+        return []      
     
 def get_prezzo_medio_acquisto():
     """

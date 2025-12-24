@@ -11,6 +11,12 @@ def render_metriche():
         for etf in etf_list:
             get_all_etf_history(str(etf['etf_ticker']))
         st.success("✅ Storico aggiornato per tutti gli ETF")
+
+    
+    from finance_info import calculate_CAGR
+    cagr = calculate_CAGR()  # Placeholder values
+    st.metric("CAGR", f"{cagr:.2f}%")
+        
     with st.container():
         st.info("🚧 Sezione in costruzione - Disponibile nella prossima versione")
         

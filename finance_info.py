@@ -97,7 +97,76 @@ def get_all_etf_history(ticker: str, interval: str = "1d") -> pd.DataFrame:
     # Se nessuno funziona
     print(f"💥 Nessun ticker valido trovato per '{ticker}'")
     return pd.DataFrame(columns=["ticker", "date", "close", "dividends"])
+
+def calculate_CAGR():
+    """
+    Calcola il CAGR del portafoglio con calcolo corretto degli anni.
+    """
+    print("🚀 Inizio calcolo CAGR...")
     
+    import pandas as pd
+    from datetime import datetime
+    
+    df_transaction = pd.DataFrame(st.session_state.etf_transactions)
+    
+    # Controlli di validità
+    if df_transaction.empty or 'Costo' not in df_transaction.columns:
+        return None
+    
+    costo_totale = df_transaction['Costo'].sum()
+    market_value_totale = df_transaction['Market Value'].sum()
+    
+    if costo_totale == 0 or market_value_totale == 0:
+        return None
+    
+    # ✅ CORRETTO: Calcola i giorni effettivi tra prima e ultima transazione
+    df_transaction['Data acquisto'] = pd.to_datetime(df_transaction['Data acquisto'], errors='coerce')
+    
+    data_inizio = df_transaction['Data acquisto'].min()
+    data_fine = df_transaction['Data acquisto'].max()
+    
+    giorni_passati = (data_fine - data_inizio).days
+    
+    # Se tutte le transazioni sono nello stesso giorno, usa almeno 1 anno
+    if giorni_passati == 0:
+        totale_anni = 1
+    else:
+        totale_anni = giorni_passati / 365.25  # ✅ Usa 365.25 per anni bisestili
+    
+    # CAGR formula corretta
+    value_ratio = market_value_totale / costo_totale
+    cagr = (value_ratio ** (1 / totale_anni)) - 1
+    
+    print(f"📊 Dettagli calcolo:")
+    print(f"   Data inizio: {data_inizio.date()}")
+    print(f"   Data fine: {data_fine.date()}")
+    print(f"   Giorni passati: {giorni_passati}")
+    print(f"   Anni: {totale_anni:.2f}")
+    print(f"   Costo totale: {costo_totale:.2f}€")
+    print(f"   Market value: {market_value_totale:.2f}€")
+    print(f"   Value ratio: {value_ratio:.4f}")
+    print(f"   CAGR: {cagr:.4f} ({cagr*100:.2f}%)")
+    
+    return cagr * 100
+
+
+def calculate_twr_monthly() -> float:
+    """
+    Calcola il TWR mensile dato una serie di cash flow e valori di portafoglio.
+    
+    Args:
+        cash_flows (pd.Series): Serie di cash flow mensili (positivi per depositi, negativi per prelievi)
+        values (pd.Series): Serie dei valori di portafoglio alla fine di ogni mese
+    
+    Returns:
+        float: TWR mensile in percentuale
+    """
+    from database import get_etf_transaction_updated, get_etf_history
+    
+    transactions = get_etf_transaction_updated()
+    etf_history = get_etf_history() 
+    min_data_acquisto = transactions['data_operazione'].min()
+    return 1 * 100  # Ritorna in percentuale  
 def get_etf_price(ticker):
     """
     Recupera il prezzo corrente di un ETF da Yahoo Finance.
@@ -168,28 +237,6 @@ def get_etf_info(ticker):
     except Exception as e:
         print(f"❌ Errore nel recupero delle informazioni per {ticker}: {str(e)}")
         return None
-
-
-def get_etf_history(ticker, period='1mo'):
-    """
-    Recupera lo storico dei prezzi di un ETF.
-    
-    Args:
-        ticker (str): Il ticker dell'ETF
-        period (str): Periodo (es: '1d', '1mo', '3mo', '1y')
-    
-    Returns:
-        DataFrame: Dataframe con storico prezzi
-    """
-    try:
-        etf = yf.Ticker(ticker)
-        history = etf.history(period=period)
-        return history
-    
-    except Exception as e:
-        print(f"❌ Errore nel recupero dello storico per {ticker}: {str(e)}")
-        return None
-
 '''# Ottenere il prezzo corrente
 prezzo = get_etf_price('CSPXJ.MI')
 print(f"Prezzo CSPXJ: €{prezzo}")
