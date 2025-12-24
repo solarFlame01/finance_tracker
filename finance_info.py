@@ -274,7 +274,49 @@ def get_etf_volatility(ticker: str, period: str = "10y") -> float:
         print(f"Errore durante il calcolo della volatilità per {ticker}: {e}")
         return 0
 
-print(3.5/get_etf_volatility('IWQU.MI'))
+def calculate_etf_correlation(ticker1: str, ticker2: str, start_date: str) -> float:
+    """
+    Calcola la correlazione tra due ETF a partire da una data specifica.
+
+    Args:
+        ticker1 (str): Il ticker del primo ETF (es: 'VWCE.MI').
+        ticker2 (str): Il ticker del secondo ETF (es: 'SWDA.MI').
+        start_date (str): La data di inizio per l'analisi (formato 'YYYY-MM-DD').
+
+    Returns:
+        float: Il coefficiente di correlazione, o None se non è possibile calcolarlo.
+    """
+    try:
+        # Scarica i dati storici per entrambi gli ETF
+        data1 = yf.download(ticker1, start=start_date, progress=False)
+        data2 = yf.download(ticker2, start=start_date, progress=False)
+
+        if data1.empty or data2.empty:
+            print(f"Dati non sufficienti per calcolare la correlazione tra {ticker1} e {ticker2}")
+            return None
+
+        # Calcola i ritorni giornalieri
+        returns1 = data1['Close'].pct_change().dropna()
+        returns2 = data2['Close'].pct_change().dropna()
+
+        # Allinea i dati per avere le stesse date
+        returns = pd.concat([returns1, returns2], axis=1, join='inner')
+        returns.columns = [ticker1, ticker2]
+
+        if len(returns) < 2:
+            print("Non ci sono abbastanza dati sovrapposti per calcolare la correlazione.")
+            return None
+        
+        # Calcola la correlazione
+        correlation = returns[ticker1].corr(returns[ticker2])
+        
+        print(f"Correlazione tra {ticker1} e {ticker2} dal {start_date}: {correlation:.4f}")
+        return correlation
+
+    except Exception as e:
+        print(f"Errore durante il calcolo della correlazione: {e}")
+        return None
+print(calculate_etf_correlation('VWCE.MI', 'DFNS.MI', '2020-01-01'))
 '''# Ottenere il prezzo corrente
 prezzo = get_etf_price('CSPXJ.MI')
 print(f"Prezzo CSPXJ: €{prezzo}")
