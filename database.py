@@ -289,12 +289,59 @@ def get_etf_history():
         list: Lista di dizionari contenenti lo storico per ETF
     """
     try:
-        response = supabase.table("etf_price_history").select("*").execute()
-        return response.data
+        all_data = []
+        page_size = 1000
+        start = 0
+        
+        while True:
+            response = supabase.table("etf_price_history").select("*").range(start, start + page_size - 1).execute()
+            all_data.extend(response.data)
+            
+            if len(response.data) < page_size:
+                break
+            
+            start += page_size
+        
+        return all_data
     except Exception as e:
         logging.error(f"Errore durante il recupero dello storico ETF: {e}")
-        return []      
+        return [] 
     
+def get_etf_correlations():
+    """
+    Recupera lo storico dei prezzi degli ETF dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti lo storico per ETF
+    """
+    try:
+        all_data = []
+        page_size = 1000
+        start = 0
+        
+        while True:
+            response = supabase.table("etf_correlations").select("*").range(start, start + page_size - 1).execute()
+            all_data.extend(response.data)
+            
+            if len(response.data) < page_size:
+                break
+            
+            start += page_size
+        
+        return all_data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dello storico ETF: {e}")
+        return [] 
+        
+def insert_etf_correlation(correlation_data):
+    # Usa upsert per inserire o aggiornare se esiste già
+    response = supabase.table("etf_correlations")\
+        .upsert(correlation_data, on_conflict="etf_symbol_1,etf_symbol_2")\
+        .execute()
+    
+    logging.info(f"Correlazione salvata con successo nel database.")
+    return response
+
 def get_prezzo_medio_acquisto():
     """
     Recupera il prezzo medio di acquisto per ETF dal database Supabase.

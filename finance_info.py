@@ -150,24 +150,6 @@ def calculate_CAGR():
     
     return cagr * 100
 
-
-def calculate_twr_monthly() -> float:
-    """
-    Calcola il TWR mensile dato una serie di cash flow e valori di portafoglio.
-    
-    Args:
-        cash_flows (pd.Series): Serie di cash flow mensili (positivi per depositi, negativi per prelievi)
-        values (pd.Series): Serie dei valori di portafoglio alla fine di ogni mese
-    
-    Returns:
-        float: TWR mensile in percentuale
-    """
-    from database import get_etf_transaction_updated, get_etf_history
-    
-    transactions = get_etf_transaction_updated()
-    etf_history = get_etf_history() 
-    min_data_acquisto = transactions['data_operazione'].min()
-    return 1 * 100  # Ritorna in percentuale  
 def get_etf_price(ticker):
     """
     Recupera il prezzo corrente di un ETF da Yahoo Finance.
@@ -274,53 +256,179 @@ def get_etf_volatility(ticker: str, period: str = "10y") -> float:
         print(f"Errore durante il calcolo della volatilità per {ticker}: {e}")
         return 0
 
-def calculate_etf_correlation(ticker1: str, ticker2: str, start_date: str) -> float:
+def get_correlation_between_two_etfs(etf1_ticker: str, etf2_ticker: str):
     """
-    Calcola la correlazione tra due ETF a partire da una data specifica.
+    Calcola la correlazione tra due specifici ETF.
+
+    Recupera i dati storici per i due ETF specificati, trova la data di inizio comune
+    e calcola il coefficiente di correlazione di Pearson tra i loro rendimenti giornalieri.
 
     Args:
-        ticker1 (str): Il ticker del primo ETF (es: 'VWCE.MI').
-        ticker2 (str): Il ticker del secondo ETF (es: 'SWDA.MI').
-        start_date (str): La data di inizio per l'analisi (formato 'YYYY-MM-DD').
+        etf1_ticker (str): Il ticker del primo ETF.
+        etf2_ticker (str): Il ticker del secondo ETF.
 
     Returns:
-        float: Il coefficiente di correlazione, o None se non è possibile calcolarlo.
+        float: Il coefficiente di correlazione, compreso tra -1 e 1.
+        str: Un messaggio di errore se uno o entrambi gli ETF non sono trovati
+             o se non ci sono dati sufficienti.
     """
-    try:
-        # Scarica i dati storici per entrambi gli ETF
-        data1 = yf.download(ticker1, start=start_date, progress=False)
-        data2 = yf.download(ticker2, start=start_date, progress=False)
+    from database import get_etf_history
+    import pandas as pd
 
-        if data1.empty or data2.empty:
-            print(f"Dati non sufficienti per calcolare la correlazione tra {ticker1} e {ticker2}")
-            return None
+    # 1. Recupera tutto lo storico
+    all_history_df = pd.DataFrame(get_etf_history())
+    
+    if all_history_df.empty:
+        return "Errore: Nessun dato storico trovato nel database."
 
-        # Calcola i ritorni giornalieri
-        returns1 = data1['Close'].pct_change().dropna()
-        returns2 = data2['Close'].pct_change().dropna()
-
-        # Allinea i dati per avere le stesse date
-        returns = pd.concat([returns1, returns2], axis=1, join='inner')
-        returns.columns = [ticker1, ticker2]
-
-        if len(returns) < 2:
-            print("Non ci sono abbastanza dati sovrapposti per calcolare la correlazione.")
-            return None
+    # 2. Controlla se entrambi gli ETF sono presenti
+    available_tickers = all_history_df['ticker'].unique()
+    if etf1_ticker not in available_tickers:
+        return f"Errore: ETF '{etf1_ticker}' non trovato nel database."
+    if etf2_ticker not in available_tickers:
+        return f"Errore: ETF '{etf2_ticker}' non trovato nel database."
         
-        # Calcola la correlazione
-        correlation = returns[ticker1].corr(returns[ticker2])
+    # 3. Filtra i dati solo per i due ETF di interesse
+    filtered_df = all_history_df[all_history_df['ticker'].isin([etf1_ticker, etf2_ticker])]
+    filtered_df['date'] = pd.to_datetime(filtered_df['date'])
+
+    # 4. Pivot dei dati per avere i prezzi su colonne separate
+    prices_pivot = filtered_df.pivot(index='date', columns='ticker', values='close')
+
+    # 5. Trova la data di inizio comune (la data più recente tra le prime date disponibili)
+    first_date_etf1 = prices_pivot[etf1_ticker].first_valid_index()
+    first_date_etf2 = prices_pivot[etf2_ticker].first_valid_index()
+    
+    if pd.isna(first_date_etf1) or pd.isna(first_date_etf2):
+        return "Errore: Dati storici insufficienti per uno degli ETF."
+
+    common_start_date = max(first_date_etf1, first_date_etf2)
+    print(f"Data inizio comune: {common_start_date.date()}")
+    # 6. Filtra il DataFrame pivotato dalla data di inizio comune
+    common_prices = prices_pivot.loc[common_start_date:]
+    
+    # 7. Rimuovi eventuali giorni in cui uno dei due ETF non ha un prezzo
+    common_prices = common_prices.dropna()
+    
+    if len(common_prices) < 2:
+        return "Errore: Non ci sono abbastanza dati sovrapposti per calcolare la correlazione."
+
+    # 8. Calcola i rendimenti giornalieri
+    returns = common_prices.pct_change().dropna()
+
+    # 9. Calcola la correlazione
+    correlation = returns[etf1_ticker].corr(returns[etf2_ticker])
+        # 10. Salva nel database se richiesto
+    
+    # Ordina i ticker per rispettare il constraint CHECK (etf_symbol_1 < etf_symbol_2)
+    symbol_1, symbol_2 = sorted([etf1_ticker, etf2_ticker])
+    
+    # Calcola la data di fine (ultima data disponibile nei dati comuni)
+    period_end = common_prices.index.max().date()
+    
+    # Prepara i dati per l'inserimento
+    correlation_data = {
+        "etf_symbol_1": symbol_1,
+        "etf_symbol_2": symbol_2,
+        "correlation_coefficient": float(round(correlation, 8)),
+        "sample_size": len(returns),
+        "calculation_date": datetime.now().isoformat(),
+        "period_start": common_start_date.date().isoformat(),
+        "period_end": period_end.isoformat()
+    }
+    
+    from database import insert_etf_correlation
+    insert_etf_correlation(correlation_data)
         
-        print(f"Correlazione tra {ticker1} e {ticker2} dal {start_date}: {correlation:.4f}")
-        return correlation
 
-    except Exception as e:
-        print(f"Errore durante il calcolo della correlazione: {e}")
-        return None
-print(calculate_etf_correlation('VWCE.MI', 'DFNS.MI', '2020-01-01'))
-'''# Ottenere il prezzo corrente
-prezzo = get_etf_price('CSPXJ.MI')
-print(f"Prezzo CSPXJ: €{prezzo}")
+    return correlation
 
-# Ottenere informazioni complete
-info = get_all_etf_history('EIMI.MI')
-print(info)'''
+def calculate_all_etf_correlations():
+    """
+    Calcola e salva tutte le correlazioni pairwise tra gli ETF disponibili nel database.
+    
+    Utilizza itertools.combinations per generare tutte le coppie uniche di ETF
+    senza duplicati o coppie ordinate inversamente (es. (A,B) ma non (B,A)).
+    
+    Returns:
+        dict: Dizionario con statistiche sull'esecuzione:
+            - total_pairs: numero totale di coppie da calcolare
+            - successful: numero di correlazioni calcolate con successo
+            - failed: numero di calcoli falliti
+            - errors: lista di errori incontrati
+    """
+    from itertools import combinations
+    from database import get_etf_history
+    import pandas as pd
+    import logging
+    
+    # Recupera tutti i ticker disponibili
+    all_history_df = pd.DataFrame(get_etf_history())
+    
+    if all_history_df.empty:
+        logging.error("Nessun dato storico trovato nel database.")
+        return {
+            "total_pairs": 0,
+            "successful": 0,
+            "failed": 0,
+            "errors": ["Nessun dato storico trovato"]
+        }
+    
+    available_tickers = sorted(all_history_df['ticker'].unique())
+    
+    # Genera tutte le coppie uniche di ETF
+    etf_pairs = list(combinations(available_tickers, 2))
+    
+    logging.info(f"Inizio calcolo correlazioni per {len(etf_pairs)} coppie di ETF")
+    print(f"Totale coppie da calcolare: {len(etf_pairs)}")
+    
+    # Statistiche di esecuzione
+    stats = {
+        "total_pairs": len(etf_pairs),
+        "successful": 0,
+        "failed": 0,
+        "errors": []
+    }
+    
+    # Calcola la correlazione per ogni coppia
+    for i, (etf1, etf2) in enumerate(etf_pairs, 1):
+        try:
+            print(f"[{i}/{len(etf_pairs)}] Calcolo correlazione: {etf1} <-> {etf2}")
+            
+            result = get_correlation_between_two_etfs(etf1, etf2)
+            
+            # Verifica se il risultato è un numero valido
+            if isinstance(result, float):
+                stats["successful"] += 1
+                logging.info(f"Correlazione {etf1}-{etf2}: {result:.4f}")
+            else:
+                # Il risultato è un messaggio di errore
+                stats["failed"] += 1
+                stats["errors"].append(f"{etf1}-{etf2}: {result}")
+                logging.warning(f"Errore per coppia {etf1}-{etf2}: {result}")
+                
+        except Exception as e:
+            stats["failed"] += 1
+            error_msg = f"{etf1}-{etf2}: {str(e)}"
+            stats["errors"].append(error_msg)
+            logging.error(f"Eccezione durante il calcolo per {etf1}-{etf2}: {e}")
+    
+    # Riepilogo finale
+    print("\n" + "="*50)
+    print("RIEPILOGO CALCOLO CORRELAZIONI")
+    print("="*50)
+    print(f"Totale coppie: {stats['total_pairs']}")
+    print(f"Successi: {stats['successful']}")
+    print(f"Fallimenti: {stats['failed']}")
+    print(f"Tasso di successo: {stats['successful']/stats['total_pairs']*100:.1f}%")
+    
+    if stats['errors']:
+        print(f"\nErrori riscontrati ({len(stats['errors'])}):")
+        for error in stats['errors'][:10]:  # Mostra solo i primi 10 errori
+            print(f"  - {error}")
+        if len(stats['errors']) > 10:
+            print(f"  ... e altri {len(stats['errors'])-10} errori")
+    
+    logging.info(f"Calcolo completato: {stats['successful']}/{stats['total_pairs']} correlazioni salvate")
+    
+    return stats
