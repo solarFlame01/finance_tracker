@@ -33,9 +33,300 @@ def render_metriche():
                             st.text(error)
                 st.rerun()
     
+    # RIGA 1: CAGR e Sharpe Ratio side by side
     from finance_info import calculate_CAGR
+    from database import get_etf_history
+    
     cagr = calculate_CAGR()
-    st.metric("CAGR", f"{cagr:.2f}%")
+    
+    # Sezione Sharpe Ratio con controllo del risk-free rate
+    with st.sidebar:
+        st.subheader("⚙️ Impostazioni Sharpe Ratio")
+        risk_free_rate = st.slider(
+            "Rendimento Risk-Free (Bond 10Y)",
+            min_value=0.0,
+            max_value=10.0,
+            value=3.5,  # Valore attuale medio (Italia/USA)
+            step=0.1,
+            help="Tasso di rendimento privo di rischio. Per l'Italia: ~3.51%, Per USA: ~4.17%"
+        )
+    
+    # Funzione per calcolare la volatilità allineata al periodo di investimento
+    def calculate_portfolio_volatility_aligned():
+        """
+        Calcola la volatilità del portafoglio allineata al periodo di investimento effettivo.
+        
+        Usa solo i rendimenti giornalieri nel periodo tra la prima e l'ultima transazione,
+        garantendo coerenza con il calcolo del CAGR.
+        
+        Returns:
+            tuple: (volatilità annualizzata in %, volatilità giornaliera in %, 
+                    data_inizio, data_fine, giorni_trading)
+        """
+        try:
+            # 1. Determina il periodo di investimento dalle transazioni
+            df_transaction = pd.DataFrame(st.session_state.etf_transactions)
+            
+            if df_transaction.empty or 'Data acquisto' not in df_transaction.columns:
+                return None, None, None, None, None
+            
+            df_transaction['Data acquisto'] = pd.to_datetime(df_transaction['Data acquisto'], errors='coerce')
+            data_inizio_portafoglio = df_transaction['Data acquisto'].min()
+            data_fine_portafoglio = pd.Timestamp.now()
+            
+            # 2. Recupera lo storico degli ETF
+            all_history_df = pd.DataFrame(get_etf_history())
+            
+            if all_history_df.empty:
+                return None, None, None, None, None
+            
+            all_history_df['date'] = pd.to_datetime(all_history_df['date'])
+            
+            # 3. Ottieni i ticker degli ETF nel portafoglio
+            portfolio_tickers = df_transaction['Ticker'].unique()
+            
+            # 4. Filtra solo gli ETF del portafoglio e il periodo di investimento
+            portfolio_history = all_history_df[
+                (all_history_df['ticker'].isin(portfolio_tickers)) &
+                (all_history_df['date'] >= data_inizio_portafoglio) &
+                (all_history_df['date'] <= data_fine_portafoglio)
+            ].copy()
+            
+            if portfolio_history.empty:
+                return None, None, None, None, None
+            
+            portfolio_history = portfolio_history.sort_values('date')
+            
+            # 5. Calcola rendimenti giornalieri per ogni ETF nel periodo
+            daily_returns_list = []
+            
+            for ticker in portfolio_tickers:
+                ticker_data = portfolio_history[portfolio_history['ticker'] == ticker].copy()
+                
+                if len(ticker_data) < 2:
+                    continue
+                
+                ticker_data = ticker_data.sort_values('date')
+                ticker_data['daily_return'] = ticker_data['close'].pct_change()
+                
+                # Rimuovi NaN e aggiungi alla lista
+                returns = ticker_data['daily_return'].dropna()
+                daily_returns_list.extend(returns.values)
+            
+            if len(daily_returns_list) == 0:
+                return None, None, None, None, None
+            
+            # 6. Converti in array e rimuovi eventuali NaN residui
+            all_daily_returns = np.array(daily_returns_list)
+            all_daily_returns = all_daily_returns[~np.isnan(all_daily_returns)]
+            
+            if len(all_daily_returns) == 0:
+                return None, None, None, None, None
+            
+            # 7. Calcola volatilità
+            daily_volatility = np.std(all_daily_returns)
+            annual_volatility = daily_volatility * np.sqrt(252)
+            
+            # 8. Conta i giorni di trading effettivi
+            giorni_trading = len(portfolio_history['date'].unique())
+            
+            return (
+                annual_volatility * 100,  # Percentuale
+                daily_volatility * 100,   # Percentuale
+                data_inizio_portafoglio,
+                data_fine_portafoglio,
+                giorni_trading
+            )
+            
+        except Exception as e:
+            st.error(f"Errore nel calcolo della volatilità: {e}")
+            return None, None, None, None, None
+    
+    # Calcolo Sharpe Ratio allineato
+    def calculate_sharpe_ratio_aligned(risk_free_rate):
+        """
+        Calcola lo Sharpe Ratio usando volatilità allineata al periodo di investimento.
+        
+        Args:
+            risk_free_rate (float): Tasso risk-free annualizzato
+        
+        Returns:
+            float: Lo Sharpe Ratio annualizzato
+        """
+        try:
+            # Usa la volatilità allineata
+            annual_vol, _, _, _, _ = calculate_portfolio_volatility_aligned()
+            
+            if annual_vol is None or cagr is None:
+                return None
+            
+            # Converti volatilità da percentuale a decimale
+            annual_volatility = annual_vol / 100
+            portfolio_return = cagr / 100
+            
+            # Sharpe Ratio = (Rp - Rf) / σp
+            sharpe_ratio = (portfolio_return - (risk_free_rate / 100)) / annual_volatility if annual_volatility > 0 else 0
+            
+            return sharpe_ratio
+            
+        except Exception as e:
+            st.error(f"Errore nel calcolo dello Sharpe Ratio: {e}")
+            return None
+    
+    # Calcolo delle metriche
+    sharpe = calculate_sharpe_ratio_aligned(risk_free_rate)
+    annual_vol, daily_vol, data_inizio, data_fine, giorni_trading = calculate_portfolio_volatility_aligned()
+    
+    # Interpretazione dello Sharpe Ratio
+    def interpret_sharpe_ratio(sharpe):
+        if sharpe is None:
+            return "N/A", "normal"
+        elif sharpe < 1.0:
+            return "Sub-Par", "inverse"
+        elif sharpe < 2.0:
+            return "Accettabile", "normal"
+        elif sharpe < 3.0:
+            return "Buono", "off"
+        else:
+            return "Eccezionale", "off"
+    
+    # Interpretazione della volatilità
+    def interpret_volatility(vol):
+        if vol is None:
+            return "N/A", "normal"
+        elif vol < 12:
+            return "Bassa", "off"
+        elif vol < 18:
+            return "Moderata", "normal"
+        elif vol < 25:
+            return "Alta", "inverse"
+        else:
+            return "Molto Alta", "inverse"
+    
+    interpretation_sharpe, delta_color_sharpe = interpret_sharpe_ratio(sharpe)
+    interpretation_vol, delta_color_vol = interpret_volatility(annual_vol)
+    
+    # Visualizza CAGR e Sharpe Ratio nella stessa riga
+    col_metrics1, col_metrics2 = st.columns(2)
+    
+    with col_metrics1:
+        st.metric("CAGR", f"{cagr:.2f}%")
+    
+    with col_metrics2:
+        if sharpe is not None:
+            st.metric(
+                "Sharpe Ratio",
+                f"{sharpe:.3f}",
+                delta=interpretation_sharpe,
+                delta_color=delta_color_sharpe,
+                help=f"Rendimento aggiustato per il rischio (Risk-free: {risk_free_rate:.2f}%)\n\n"
+                     f"< 1.0: Sub-Par | 1.0-2.0: Accettabile | 2.0-3.0: Buono | > 3.0: Eccezionale"
+            )
+        else:
+            st.metric("Sharpe Ratio", "N/A", help="Dati insufficienti per il calcolo")
+    
+    # RIGA 2: Volatilità del portafoglio
+    col_metrics3, col_metrics4 = st.columns(2)
+    
+    with col_metrics3:
+        if annual_vol is not None:
+            st.metric(
+                "Volatilità Annualizzata",
+                f"{annual_vol:.2f}%",
+                delta=interpretation_vol,
+                delta_color=delta_color_vol,
+                help="Deviazione standard dei rendimenti annualizzati nel periodo di investimento\n\n"
+                     "< 12%: Bassa | 12-18%: Moderata | 18-25%: Alta | > 25%: Molto Alta\n\n"
+                     "Benchmark: S&P 500 ~15-20%, Portafogli diversificati ~12-18%"
+            )
+        else:
+            st.metric("Volatilità Annualizzata", "N/A", help="Dati insufficienti per il calcolo")
+    
+    with col_metrics4:
+        if daily_vol is not None:
+            st.metric(
+                "Volatilità Giornaliera",
+                f"{daily_vol:.3f}%",
+                help="Deviazione standard dei rendimenti giornalieri nel periodo di investimento"
+            )
+        else:
+            st.metric("Volatilità Giornaliera", "N/A", help="Dati insufficienti per il calcolo")
+    
+    # Spiegazione delle formule
+    with st.expander("📖 Formule e Interpretazioni"):
+        col_exp1, col_exp2 = st.columns(2)
+        
+        with col_exp1:
+            st.markdown("""
+            **Sharpe Ratio = (Rp - Rf) / σp**
+            
+            Dove:
+            - **Rp** = Rendimento del portafoglio (CAGR)
+            - **Rf** = Tasso risk-free (Bond 10 anni)
+            - **σp** = Volatilità del portafoglio
+            
+            **Interpretazione:**
+            - **< 1.0**: Sub-par
+            - **1.0 - 2.0**: Accettabile
+            - **2.0 - 3.0**: Buono
+            - **> 3.0**: Eccezionale
+            """)
+        
+        with col_exp2:
+            st.markdown("""
+            **Volatilità = σ × √252**
+            
+            Dove:
+            - **σ** = Deviazione standard rendimenti giornalieri
+            - **252** = Giorni di trading in un anno
+            
+            **Benchmark:**
+            - **Bond governativi**: 2-5%
+            - **S&P 500**: 15-20%
+            - **Portafogli diversificati**: 12-18%
+            - **Mercati emergenti**: 20-25%
+            - **Portafogli concentrati**: > 25%
+            """)
+        
+        # Analisi dettagliata se entrambi i valori sono disponibili
+        if annual_vol is not None and sharpe is not None and data_inizio is not None:
+            st.divider()
+            st.markdown("### 🔍 Analisi Portafoglio")
+            
+            excess_return = cagr - risk_free_rate
+            giorni_totali = (data_fine - data_inizio).days
+            anni_investimento = giorni_totali / 365.25
+            
+            col_detail1, col_detail2 = st.columns(2)
+            
+            with col_detail1:
+                st.markdown(f"""
+                **Periodo di Investimento:**
+                - Data inizio: **{data_inizio.date()}**
+                - Data fine: **{data_fine.date()}**
+                - Giorni totali: **{giorni_totali}**
+                - Anni: **{anni_investimento:.2f}**
+                - Giorni di trading: **{giorni_trading}**
+                """)
+            
+            with col_detail2:
+                st.markdown(f"""
+                **Componenti Sharpe Ratio:**
+                - CAGR: **{cagr:.2f}%**
+                - Risk-Free: **{risk_free_rate:.2f}%**
+                - Excess Return: **{excess_return:.2f}%**
+                - Volatilità: **{annual_vol:.2f}%**
+                - **Sharpe: {sharpe:.3f}**
+                """)
+            
+            # Suggerimenti basati sui valori
+            if annual_vol > 20:
+                st.warning(f"⚠️ Volatilità alta ({annual_vol:.2f}%). Considera maggiore diversificazione.")
+            
+            if sharpe < 0.5 and excess_return > 0:
+                st.warning(f"⚠️ Sharpe basso ({sharpe:.3f}) nonostante rendimento positivo. Problema: volatilità eccessiva.")
+            elif sharpe >= 1.0:
+                st.success(f"✅ Sharpe {sharpe:.3f}: buon equilibrio rischio/rendimento.")
     
     # --- NUOVA SEZIONE: MATRICE DI CORRELAZIONE ---
     st.divider()
@@ -254,37 +545,16 @@ def render_metriche():
         with col1:
             st.subheader("📈 Metriche Pianificate")
             st.markdown("""
-            - **Sharpe Ratio**: Misura del rendimento corretto per il rischio
             - **Sortino Ratio**: Focalizzato sulla volatilità al ribasso
             - **Beta vs Benchmark**: Sensibilità al mercato
             - **Alpha**: Rendimento aggiuntivo vs benchmark
             - **R²**: Bontà della correlazione con benchmark
             """)
             
-            # Simulazione placeholder
-            st.subheader("📊 Simulazione Metrica")
-            sharpe_sim = st.slider("Sharpe Ratio simulato", -2.0, 5.0, 1.5, 0.1)
-            st.metric("Sharpe Ratio", f"{sharpe_sim:.2f}", 
-                     "Buono" if sharpe_sim > 1.0 else "Da migliorare")
-        
         with col2:
             st.subheader("📉 Analisi di Rischio")
             st.markdown("""
             - **Value at Risk (VaR)**: Perdita massima attesa
             - **Maximum Drawdown**: Massimo calo storico
-            - **Volatilità Annualizzata**: Rischi di prezzo
-            - **Correlazione Portafoglio**: Diversificazione
             - **Stress Test**: Performance in scenari critici
             """)
-            
-            # Grafico placeholder
-            st.subheader("📈 Andamento Rischio/Rendimento")
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=[0.1, 0.2, 0.3, 0.4, 0.5],
-                y=[0.05, 0.08, 0.12, 0.15, 0.18],
-                mode='lines+markers',
-                name='Portafoglio'
-            ))
-            fig.update_layout(height=300, title="Frontiera Efficiente")
-            st.plotly_chart(fig, use_container_width=True)

@@ -432,3 +432,5 @@ def calculate_all_etf_correlations():
     logging.info(f"Calcolo completato: {stats['successful']}/{stats['total_pairs']} correlazioni salvate")
     
     return stats
+
+get_all_etf_history("MB28")
