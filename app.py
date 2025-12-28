@@ -1,7 +1,10 @@
 # app.py
 import streamlit as st
 from datetime import datetime
-
+import os, time, hashlib
+from pathlib import Path
+from datetime import datetime
+import streamlit as st
 from config import DATA_FILE, ETF_DETAILS_FILE, INTERMEDIARI
 from data_manager import load_etf_data, load_etf_details, load_etf_name
 
@@ -19,7 +22,99 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"  # Mostra la sidebar di default
 )
+# Login minimale (come già avevi)
+def require_login(ttl: int = 3600):
+    """Simple password based login with a short-lived cache.
 
+    A successful login stores a token in the query parameters so that a
+    browser refresh within ``ttl`` seconds does not ask for the password
+    again.  The password (hashed) is also cached so that re-entering it after
+    expiration still works even if the environment variable is no longer
+    available.
+    """
+
+    # --- helper for query params (compat with older Streamlit) ---
+    def _get_qp() -> dict:
+        if hasattr(st, "query_params"):
+            return {k: v for k, v in st.query_params.items()}
+        return {k: v[0] for k, v in st.experimental_get_query_params().items()}
+
+    def _set_qp(**params):
+        if hasattr(st, "query_params"):
+            st.query_params.clear()
+            for k, v in params.items():
+                st.query_params[k] = v
+        else:
+            st.experimental_set_query_params(**params)
+
+    def _clear_qp():
+        if hasattr(st, "query_params"):
+            st.query_params.clear()
+        else:
+            st.experimental_set_query_params()
+
+    # ------------------------------------------------------------------
+    params = _get_qp()
+
+    # Recupera o memorizza l'hash della password
+    pw_hash = st.session_state.get("pw_hash")
+    hash_file = Path(".app_pw_hash")
+    if not pw_hash and hash_file.exists():
+        try:
+            pw_hash = hash_file.read_text(encoding="utf-8").strip()
+            st.session_state["pw_hash"] = pw_hash
+        except Exception:
+            pw_hash = None
+    if not pw_hash:
+        raw = st.secrets.get("APP_PASSWORD") or os.getenv("APP_PASSWORD")
+        if raw:
+            pw_hash = hashlib.sha256(str(raw).encode()).hexdigest()
+            st.session_state["pw_hash"] = pw_hash
+            try:
+                hash_file.write_text(pw_hash, encoding="utf-8")
+            except Exception:
+                pass
+
+    if not pw_hash:
+        st.error("Password non configurata. Imposta APP_PASSWORD nei Secrets o ENV.")
+        st.stop()
+
+    # Verifica token in query params
+    token = params.get("auth")
+    try:
+        exp = float(params.get("exp", 0))
+    except Exception:
+        exp = 0
+
+    if token == pw_hash and exp > time.time():
+        st.session_state.auth_ok = True
+
+    if st.session_state.get("auth_ok"):
+        with st.sidebar:
+            if st.button("Logout"):
+                st.session_state.pop("auth_ok", None)
+                _clear_qp()
+                st.rerun()
+        return True
+
+    # Se il token è scaduto ripulisci i parametri
+    if token and exp <= time.time():
+        _clear_qp()
+
+    # Form di login
+    st.markdown("## 🔒 Accesso richiesto")
+    pwd = st.text_input("Password", type="password")
+    if st.button("Entra", type="primary"):
+        if hashlib.sha256(pwd.encode()).hexdigest() == pw_hash:
+            st.session_state.auth_ok = True
+            expiry = time.time() + ttl
+            _set_qp(auth=pw_hash, exp=str(int(expiry)))
+            st.success("Accesso consentito ✅"); st.rerun()
+        else:
+            st.error("Password errata")
+    st.stop()
+    
+    require_login()
 # Inizializzazione session state
 if 'etf_data' not in st.session_state:
     st.session_state.etf_data = load_etf_data()
