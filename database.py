@@ -4,13 +4,14 @@ import os
 from dotenv import load_dotenv
 import logging
 import pandas as pd
+import streamlit as st
 from utils import normalize_data
 # Carica le variabili dal file .env
 load_dotenv() 
 # Reference Supabase: https://supabase.com/docs/reference/python/eq
 
-url: str = os.getenv("SUPABASE_URL","")
-key: str = os.getenv("SUPABASE_KEY","")
+url: str = os.getenv("SUPABASE_URL", st.secrets.get("SUPABASE_URL",""))
+key: str = os.getenv("SUPABASE_KEY", st.secrets.get("SUPABASE_KEY",""))
 supabase: Client = create_client(supabase_url=url, supabase_key=key)
 '''
 # Esempio SELECT
