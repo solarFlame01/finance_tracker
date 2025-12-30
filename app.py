@@ -157,7 +157,19 @@ if 'distribuzione_area_geografica' not in st.session_state:
 if 'prezzo_medio_acquisto' not in st.session_state:
     from database import get_prezzo_medio_acquisto
     st.session_state.prezzo_medio_acquisto = get_prezzo_medio_acquisto()
-
+    
+if 'asset_allocation' not in st.session_state:
+    from database import get_asset_allocation
+    st.session_state.asset_allocation = get_asset_allocation()
+    
+if 'rendimento_cedole' not in st.session_state:
+    from database import get_rendimento_cedole
+    st.session_state.rendimento_cedole = get_rendimento_cedole()
+    
+if 'bond_transactions' not in st.session_state:
+    from database import get_bond_transactions
+    st.session_state.bond_transactions = get_bond_transactions()
+    
 # Navigazione principale con sidebar menu
 def main():
     # Inizializzazione session state per la pagina attiva

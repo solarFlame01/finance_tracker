@@ -1,3 +1,4 @@
+from views.bond_tracker import render_bond_tracker
 import streamlit as st
 from metrics import calculate_metrics
 import plotly.graph_objects as go
@@ -58,7 +59,7 @@ def render_dashboard():
 
     if st.session_state.etf_transactions:
         # Tab per organizzare le sezioni
-        tab1, tab2, tab4, tab5, tab6, tab7 = st.tabs(["📈 Riepilogo", "📊 Analisi", "⚙️ Impostazioni", "🎯 Metriche", "➕ Inserisci Transazione", "🏆 Rendimento annuo"])
+        tab1, tab2, tab4, tab5, tab6, tab7, tab8 = st.tabs(["📈 Riepilogo", "📊 Analisi", "⚙️ Impostazioni", "🎯 Metriche", "➕ Inserisci Transazione", "🏆 Rendimento annuo", "🏦 Bond Tracker"])
         
         # ===== TAB 1: RIEPILOGO =====
         with tab1:
@@ -178,6 +179,26 @@ def render_dashboard():
                         st.dataframe(df_bottom_3_etf, width="stretch")
                     else:
                         st.info("Nessun dato disponibile")
+                        
+            st.markdown("<div class='subsection-title'>Distribuzione completa del portafoglio</div>", unsafe_allow_html=True)
+            if st.session_state.asset_allocation:
+                df_asset_allocation = pd.DataFrame(st.session_state.asset_allocation)
+                if not df_asset_allocation.empty:
+                    fig1 = go.Figure(data=[go.Pie(
+                        labels=df_asset_allocation['asset_class'],           
+                        values=df_asset_allocation['percentage'],
+                        textinfo='label+percent',  # cosa mostrare
+                        textposition='auto',     # fuori dalla fetta
+                        textfont=dict(size=12),     # grandezza testo
+                        hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"
+                    )])
+                    fig1.update_layout(
+                        title="",
+                        height=400,
+                        showlegend=True,
+                        margin=dict(t=10, b=10)
+                    )
+                    st.plotly_chart(fig1, width="stretch")             
             # Grafici in layout 2x2
             col1, col2 = st.columns(2, gap="large")
             
@@ -310,53 +331,6 @@ def render_dashboard():
         with tab7:
             from views.rendimento_annuo import render_rendimento_annuo
             render_rendimento_annuo()
-    
-    else:
-        # Sezione quando non ci sono transazioni
-        st.markdown("<div style='text-align: center; padding: 40px;'>", unsafe_allow_html=True)
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                    padding: 40px; border-radius: 15px; color: white; text-align: center;'>
-            <h2 style='font-size: 2.5em; margin-bottom: 20px;'>👋 Benvenuto!</h2>
-            <p style='font-size: 1.2em; margin-bottom: 30px;'>
-                Non hai ancora aggiunto transazioni ETF al tuo portafoglio
-            </p>
-            <p style='font-size: 1em; margin-bottom: 40px; opacity: 0.9;'>
-                Aggiungi la tua prima transazione nella sezione <b>"Gestione ETF"</b> per iniziare a tracciare i tuoi investimenti
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
-        
-        # Mostra comunque i dati finti come esempio
-        st.markdown("<div class='section-title'>📌 Esempio di Portafoglio</div>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #666; margin-bottom: 20px;'>Questo è come apparirà il tuo portafoglio una volta aggiunta la prima transazione</p>", unsafe_allow_html=True)
-        
-        data_finti = {
-            "Ticker": ["AUWI", "SUAS", "XDW0", "SMEA", "EIMI", "RBOT", "PHPT", "NUCL", "SUAS", "XDW0", "SJPA"],
-            "Quantità": [51, 15, 3, 1, 2, 9, 1, 1, 16, 3, 1],
-            "Prezzo di acquisto (€)": [45.74, 14.55, 44.33, 87.36, 35.34, 13.14, 107.92, 42.82, 14.78, 45.18, 56.19],
-            "Prezzo corrente (€)": [45.52, 15.22, 45.52, 92.91, 37.50, 13.67, 150.74, 45.60, 15.22, 45.52, 58.59],
-            "Costo (€)": [2332.74, 218.25, 132.99, 87.36, 70.68, 118.26, 107.92, 42.82, 236.48, 135.54, 56.19],
-            "Market Value (€)": [2321.52, 228.24, 136.56, 92.91, 75.00, 123.03, 150.74, 45.60, 243.46, 136.56, 58.59],
-            "Crescita %": [-0.48, 4.58, 2.68, 6.35, 6.11, 4.03, 39.68, 6.49, 2.95, 0.75, 4.27],
-            "Valuta": ["EUR", "EUR", "EUR", "EUR", "EUR", "EUR", "EUR", "EUR", "EUR", "EUR", "EUR"],
-            "Data acquisto": ["2025-09-23", "2025-09-08", "2025-09-08", "2025-09-08", "2025-09-08", "2025-09-08", "2025-09-08", "2025-09-08", "2025-08-25", "2025-08-25", "2025-08-25"],
-            "Emittente": ["iShares", "iShares", "XTRACKERS", "iShares", "iShares", "iShares", "Wisdom Tree", "Vaneck", "iShares", "XTRACKERS", "iShares"],
-            "ISIN": ["IE00BG6THM91", "IE00BYJRR92", "IE00BM67THM91", "IE00B4K48X80", "IE00BKM4GZ66", "IE00BYZK4552", "JE00B1VS2W53", "IE00M7V94E1", "IE00BYJRR92", "IE00BM67THM91", "IE00B4L5YX21"]
-        }
-        
-        df_finti = pd.DataFrame(data_finti)
-        st.dataframe(df_finti, width="stretch", height=400)
-        
-        st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
-        
-        # Pulsante promozionale
-        st.markdown("""
-        <div style='background: #f0f4ff; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;'>
-            <h4 style='color: #667eea; margin-top: 0;'>🚀 Inizia Ora</h4>
-            <p style='margin: 0; color: #333;'>Vai alla sezione <b>"Gestione ETF"</b> per aggiungere il tuo primo investimento e iniziare a monitorare il tuo portafoglio</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # ==== TAB BOND TRACKER ====
+        with tab8:
+            render_bond_tracker()

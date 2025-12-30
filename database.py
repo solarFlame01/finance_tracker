@@ -8,10 +8,23 @@ import streamlit as st
 from utils import normalize_data
 # Carica le variabili dal file .env
 load_dotenv() 
-# Reference Supabase: https://supabase.com/docs/reference/python/eq
 
-url: str = os.getenv("SUPABASE_URL", st.secrets.get("SUPABASE_URL",""))
-key: str = os.getenv("SUPABASE_KEY", st.secrets.get("SUPABASE_KEY",""))
+# Funzione helper per recuperare secrets in modo sicuro
+def get_secret(key: str, default: str = "") -> str:
+    """
+    Recupera il secret prima da Streamlit secrets poi da environment variables
+    """
+    try:
+        # Prova prima st.secrets (Streamlit Cloud o .streamlit/secrets.toml locale)
+        return st.secrets[key]
+    except (FileNotFoundError, KeyError):
+        # Fallback su environment variables (locale con .env)
+        return os.getenv(key, default)
+
+# Recupera le credenziali
+url: str = get_secret("SUPABASE_URL")
+key: str = get_secret("SUPABASE_KEY")
+
 supabase: Client = create_client(supabase_url=url, supabase_key=key)
 '''
 # Esempio SELECT
@@ -356,7 +369,48 @@ def get_prezzo_medio_acquisto():
     except Exception as e:
         logging.error(f"Errore durante il recupero del prezzo medio di acquisto: {e}")
         return []   
-      
+    
+def get_asset_allocation():
+    """
+    Recupera l'asset allocation del portafoglio dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti l'asset allocation
+    """
+    try:
+        response = supabase.table("v_asset_allocation").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dell'asset allocation: {e}")
+        return []   
+    
+def get_bond_transactions():
+    """
+    Recupera le transazioni obbligazionarie dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti le transazioni obbligazionarie
+    """
+    try:
+        response = supabase.table("transaction").select("*").like("ticker", "M.%").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero delle transazioni obbligazionarie: {e}")
+        return []   
+     
+def get_rendimento_cedole():
+    """
+    Recupera il rendimento delle cedole dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti il rendimento delle cedole
+    """
+    try:
+        response = supabase.table("v_rendimento_cedole").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del rendimento delle cedole: {e}")
+
 def insert_update_etf_price(ticker, price):
     """
     Inserisce o aggiorna il prezzo di un ETF nella tabella "etf_prices".
@@ -476,3 +530,51 @@ if __name__ == "__main__":
     else:
         print("Nessun dato trovato.")
 
+from supabase import Client
+from datetime import date, datetime
+
+def insert_transaction(
+    data_operazione: date,
+    ticker: str,
+    protocollo: int,
+    riferimento_ordine: str,
+    tipo_operazione: str = 'Acquisto',
+    isin: str = '',
+    descrizione: str = '',
+    importo_euro: float = 0,
+    importo_divisa: float = 0.0,
+    divisa: str = '',
+    quantita: float = 0.0,
+    intermediario: str = ''
+):
+    """
+    Inserisce una transazione nella tabella transaction
+    """
+    data = {
+        "data_operazione" : data_operazione.isoformat(),  # Converti in formato ISO
+        "data_valuta": data_operazione.isoformat(),
+        "ticker": ticker,
+        "protocollo": protocollo,
+        "riferimento_ordine": riferimento_ordine
+    }
+    
+    # Aggiungi campi opzionali solo se presenti
+    if tipo_operazione:
+        data["tipo_operazione"] = tipo_operazione
+    if isin:
+        data["isin"] = isin
+    if descrizione:
+        data["descrizione"] = descrizione
+    if importo_euro is not None:
+        data["importo_euro"] = - importo_euro
+    if importo_divisa is not None:
+        data["importo_divisa"] = importo_divisa
+    if divisa:
+        data["divisa"] = divisa
+    if quantita is not None:
+        data["quantita"] = quantita
+    if intermediario:
+        data["intermediario"] = intermediario
+    
+    response = supabase.table("transaction").insert(data).execute()
+    return response
