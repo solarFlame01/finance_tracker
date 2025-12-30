@@ -1,0 +1,304 @@
+tipo,tablename,ddl
+VIEW,etf_transaction_updated,"CREATE OR REPLACE VIEW etf_transaction_updated AS  SELECT t.id,
+    t.ticker AS ""Ticker"",
+    t.quantita AS ""Quantità"",
+    round(abs((t.importo_euro / t.quantita)), 2) AS ""Prezzo di acquisto"",
+    COALESCE(ep.price, (abs((t.importo_euro / t.quantita)))::double precision) AS ""Prezzo corrente"",
+    abs(t.importo_euro) AS ""Costo"",
+    ((COALESCE(ep.price, (abs((t.importo_euro / t.quantita)))::double precision) * (t.quantita)::double precision))::numeric AS ""Market Value"",
+    round(((((COALESCE(ep.price, (abs((t.importo_euro / t.quantita)))::double precision) - (abs((t.importo_euro / t.quantita)))::double precision) / (abs((t.importo_euro / t.quantita)))::double precision) * (100)::double precision))::numeric, 2) AS ""Crescita %"",
+    'EUR'::text AS ""Valuta"",
+    t.data_operazione AS ""Data acquisto"",
+    split_part((t.descrizione)::text, ' '::text, 1) AS ""Emittente"",
+    t.isin AS ""ISIN"",
+    now() AS created_at,
+    now() AS updated_at
+   FROM (transaction t
+     LEFT JOIN etf_prices ep ON (((t.ticker)::text = (ep.ticker)::text)))
+  WHERE (((t.isin)::text <> '0'::text) AND (t.protocollo = 0.0) AND ((t.ticker)::text !~~ 'M.%'::text))
+  ORDER BY t.data_operazione DESC;;"
+VIEW,unique_tickers_view,"CREATE OR REPLACE VIEW unique_tickers_view AS  SELECT DISTINCT etf_ticker
+   FROM etf_holdings
+  WHERE (etf_ticker IN ( SELECT DISTINCT t.ticker
+           FROM transaction t
+          WHERE ((t.ticker)::text !~~ 'M.%'::text)));;"
+VIEW,v_asset_allocation,"CREATE OR REPLACE VIEW v_asset_allocation AS  WITH bonds_total AS (
+         SELECT 'Bond'::text AS asset_class,
+            abs(sum(transaction.importo_euro)) AS market_value
+           FROM transaction
+          WHERE (((transaction.ticker)::text ~~ 'M.%'::text) AND ((transaction.tipo_operazione)::text = 'Acquisto'::text))
+        ), commodities_total AS (
+         SELECT 'Commodities'::text AS asset_class,
+            sum(v_dist_etf.market_value_attuale) AS market_value
+           FROM v_dist_etf
+          WHERE ((v_dist_etf.ticker)::text IN ( SELECT etf_holdings.etf_ticker
+                   FROM etf_holdings
+                  WHERE (etf_holdings.settore = 'Materie prime'::text)))
+        ), stocks_total AS (
+         SELECT 'Azioni'::text AS asset_class,
+            sum(v_dist_etf.market_value_attuale) AS market_value
+           FROM v_dist_etf
+          WHERE (NOT ((v_dist_etf.ticker)::text IN ( SELECT etf_holdings.etf_ticker
+                   FROM etf_holdings
+                  WHERE (etf_holdings.settore = 'Materie prime'::text))))
+        ), all_assets AS (
+         SELECT bonds_total.asset_class,
+            bonds_total.market_value
+           FROM bonds_total
+        UNION ALL
+         SELECT commodities_total.asset_class,
+            commodities_total.market_value
+           FROM commodities_total
+        UNION ALL
+         SELECT stocks_total.asset_class,
+            stocks_total.market_value
+           FROM stocks_total
+        ), portfolio_total AS (
+         SELECT sum(all_assets.market_value) AS total_value
+           FROM all_assets
+        )
+ SELECT a.asset_class,
+    a.market_value,
+    round((((a.market_value / p.total_value) * (100)::double precision))::numeric, 2) AS percentage,
+    p.total_value AS portfolio_total
+   FROM (all_assets a
+     CROSS JOIN portfolio_total p)
+  ORDER BY a.market_value DESC;;"
+VIEW,v_bottom_3_etf_guadagni,"CREATE OR REPLACE VIEW v_bottom_3_etf_guadagni AS  SELECT ticker,
+    costo_investito_eur,
+    market_value_attuale,
+    guadagno_eur,
+    guadagno_pct
+   FROM v_etf_performance
+  WHERE (guadagno_pct IS NOT NULL)
+  ORDER BY guadagno_pct, market_value_attuale DESC, ticker
+ LIMIT 3;;"
+VIEW,v_dist_area_geografica,"CREATE OR REPLACE VIEW v_dist_area_geografica AS  WITH base AS (
+         SELECT COALESCE(hn.area_geografica, 'Non mappato'::text) AS area_geografica,
+            ((k.market_value_attuale)::numeric * COALESCE((hn.peso_norm)::numeric, 1.0)) AS alloc_mv
+           FROM (v_portfolio_ticker_kpi k
+             LEFT JOIN v_etf_holdings_norm hn ON ((hn.etf_ticker = (k.ticker)::text)))
+          WHERE (k.market_value_attuale IS NOT NULL)
+        ), tot AS (
+         SELECT sum(base.alloc_mv) AS total_mv
+           FROM base
+        )
+ SELECT area_geografica,
+    (round(sum(alloc_mv), 2))::double precision AS market_value_attuale,
+    (round(((100.0 * sum(alloc_mv)) / NULLIF(( SELECT tot.total_mv
+           FROM tot), (0)::numeric)), 2))::double precision AS distribuzione_pct
+   FROM base b
+  GROUP BY area_geografica
+  ORDER BY ((round(sum(alloc_mv), 2))::double precision) DESC;;"
+VIEW,v_dist_etf,"CREATE OR REPLACE VIEW v_dist_etf AS  SELECT ticker,
+    (round((market_value_attuale)::numeric, 2))::double precision AS market_value_attuale,
+    (round(((100.0 * (market_value_attuale)::numeric) / NULLIF(sum((market_value_attuale)::numeric) OVER (), (0)::numeric)), 2))::double precision AS distribuzione_pct
+   FROM v_portfolio_ticker_kpi k
+  WHERE (market_value_attuale IS NOT NULL);;"
+VIEW,v_dist_settore,"CREATE OR REPLACE VIEW v_dist_settore AS  WITH base AS (
+         SELECT COALESCE(hn.settore, 'Non mappato'::text) AS settore,
+            ((k.market_value_attuale)::numeric * COALESCE((hn.peso_norm)::numeric, 1.0)) AS alloc_mv
+           FROM (v_portfolio_ticker_kpi k
+             LEFT JOIN v_etf_holdings_norm hn ON ((hn.etf_ticker = (k.ticker)::text)))
+          WHERE (k.market_value_attuale IS NOT NULL)
+        ), tot AS (
+         SELECT sum(base.alloc_mv) AS total_mv
+           FROM base
+        )
+ SELECT settore,
+    (round(sum(alloc_mv), 2))::double precision AS market_value_attuale,
+    (round(((100.0 * sum(alloc_mv)) / NULLIF(( SELECT tot.total_mv
+           FROM tot), (0)::numeric)), 2))::double precision AS distribuzione_pct
+   FROM base b
+  GROUP BY settore
+  ORDER BY ((round(sum(alloc_mv), 2))::double precision) DESC;;"
+VIEW,v_dist_valuta_mercato,"CREATE OR REPLACE VIEW v_dist_valuta_mercato AS  WITH base AS (
+         SELECT COALESCE(hn.valuta_mercato, 'Non mappato'::text) AS valuta_mercato,
+            ((k.market_value_attuale)::numeric * COALESCE((hn.peso_norm)::numeric, 1.0)) AS alloc_mv
+           FROM (v_portfolio_ticker_kpi k
+             LEFT JOIN v_etf_holdings_norm hn ON ((hn.etf_ticker = (k.ticker)::text)))
+          WHERE (k.market_value_attuale IS NOT NULL)
+        ), tot AS (
+         SELECT sum(base.alloc_mv) AS total_mv
+           FROM base
+        )
+ SELECT valuta_mercato,
+    (round(sum(alloc_mv), 2))::double precision AS market_value_attuale,
+    (round(((100.0 * sum(alloc_mv)) / NULLIF(( SELECT tot.total_mv
+           FROM tot), (0)::numeric)), 2))::double precision AS distribuzione_pct
+   FROM base b
+  GROUP BY valuta_mercato
+  ORDER BY ((round(sum(alloc_mv), 2))::double precision) DESC;;"
+VIEW,v_etf_holdings_norm,"CREATE OR REPLACE VIEW v_etf_holdings_norm AS  SELECT etf_ticker,
+    ticker AS holding_ticker,
+    nome,
+    COALESCE(settore, 'Sconosciuto'::text) AS settore,
+    COALESCE(area_geografica, 'Sconosciuto'::text) AS area_geografica,
+    COALESCE(valuta_mercato, 'Sconosciuto'::text) AS valuta_mercato,
+    COALESCE(ponderazione, (0)::double precision) AS ponderazione_raw,
+    (COALESCE(ponderazione, (0)::double precision) / NULLIF(sum(COALESCE(ponderazione, (0)::double precision)) OVER (PARTITION BY etf_ticker), (0)::double precision)) AS peso_norm
+   FROM etf_holdings h;;"
+VIEW,v_etf_performance,"CREATE OR REPLACE VIEW v_etf_performance AS  SELECT ticker,
+    round(costo_investito_eur, 2) AS costo_investito_eur,
+    (round((market_value_attuale)::numeric, 2))::double precision AS market_value_attuale,
+    round(((market_value_attuale)::numeric - costo_investito_eur), 2) AS guadagno_eur,
+    (round(((100.0 * ((market_value_attuale)::numeric - costo_investito_eur)) / NULLIF(abs(costo_investito_eur), (0)::numeric)), 2))::double precision AS guadagno_pct
+   FROM v_portfolio_ticker_kpi k
+  WHERE (EXISTS ( SELECT 1
+           FROM etf_holdings h
+          WHERE (h.etf_ticker = (k.ticker)::text)));;"
+VIEW,v_etf_rendimento_annuo,"CREATE OR REPLACE VIEW v_etf_rendimento_annuo AS  WITH first_tx AS (
+         SELECT t.ticker,
+            min(t.data_operazione) AS prima_operazione
+           FROM transaction t
+          GROUP BY t.ticker
+        ), base AS (
+         SELECT k.ticker,
+            f.prima_operazione,
+            (CURRENT_DATE - f.prima_operazione) AS giorni_investimento,
+            k.costo_investito_eur,
+            k.market_value_attuale
+           FROM (v_portfolio_ticker_kpi k
+             JOIN first_tx f ON (((f.ticker)::text = (k.ticker)::text)))
+          WHERE (EXISTS ( SELECT 1
+                   FROM etf_holdings h
+                  WHERE (h.etf_ticker = (k.ticker)::text)))
+        )
+ SELECT ticker,
+    prima_operazione,
+    giorni_investimento,
+    round(costo_investito_eur, 2) AS costo_investito_eur,
+    (round((market_value_attuale)::numeric, 2))::double precision AS market_value_attuale,
+    (round((100.0 * (power(((market_value_attuale)::numeric / NULLIF(costo_investito_eur, (0)::numeric)), (365.0 / NULLIF((giorni_investimento)::numeric, (0)::numeric))) - (1)::numeric)), 2))::double precision AS rendimento_annuo_pct
+   FROM base b
+  WHERE ((costo_investito_eur IS NOT NULL) AND (market_value_attuale IS NOT NULL) AND (costo_investito_eur > (0)::numeric) AND (giorni_investimento > 0));;"
+VIEW,v_portafoglio_rendimento_annuo,"CREATE OR REPLACE VIEW v_portafoglio_rendimento_annuo AS  WITH etf_universe AS (
+         SELECT DISTINCT h.etf_ticker AS ticker
+           FROM etf_holdings h
+        ), first_tx AS (
+         SELECT t.ticker,
+            min(t.data_operazione) AS prima_operazione
+           FROM transaction t
+          GROUP BY t.ticker
+        ), agg AS (
+         SELECT min(f.prima_operazione) AS prima_operazione_portafoglio,
+            sum(k.costo_investito_eur) AS costo_investito_tot_eur,
+            (sum(k.market_value_attuale))::numeric AS market_value_tot_attuale
+           FROM ((v_portfolio_ticker_kpi k
+             JOIN etf_universe u ON ((u.ticker = (k.ticker)::text)))
+             JOIN first_tx f ON (((f.ticker)::text = (k.ticker)::text)))
+          WHERE ((k.costo_investito_eur IS NOT NULL) AND (k.market_value_attuale IS NOT NULL))
+        )
+ SELECT prima_operazione_portafoglio,
+    (CURRENT_DATE - prima_operazione_portafoglio) AS giorni_investimento,
+    round(costo_investito_tot_eur, 2) AS costo_investito_tot_eur,
+    (round(market_value_tot_attuale, 2))::double precision AS market_value_tot_attuale,
+    round((market_value_tot_attuale - costo_investito_tot_eur), 2) AS guadagno_tot_eur,
+    (round((100.0 * (power((market_value_tot_attuale / NULLIF(costo_investito_tot_eur, (0)::numeric)), (365.0 / NULLIF(((CURRENT_DATE - prima_operazione_portafoglio))::numeric, (0)::numeric))) - (1)::numeric)), 2))::double precision AS rendimento_annuo_pct
+   FROM agg a
+  WHERE ((costo_investito_tot_eur > (0)::numeric) AND (prima_operazione_portafoglio IS NOT NULL));;"
+VIEW,v_portfolio_positions,"CREATE OR REPLACE VIEW v_portfolio_positions AS  SELECT v.ticker,
+    sum(v.quantita_signed) AS quantita,
+    round(sum(v.cashflow_eur_signed), 2) AS costo_investito_eur,
+    max(v.data_operazione) AS ultima_operazione,
+    round(avg((abs(v.importo_euro) / v.quantita)), 2) AS prezzo_medio_acquisto,
+    e.price
+   FROM (v_tx_normalized v
+     JOIN etf_prices e ON (((v.ticker)::text = (e.ticker)::text)))
+  WHERE (v.quantita <> (0)::numeric)
+  GROUP BY v.ticker, e.price
+ HAVING (sum(v.quantita_signed) <> (0)::numeric);;"
+VIEW,v_portfolio_ticker_kpi,"CREATE OR REPLACE VIEW v_portfolio_ticker_kpi AS  SELECT p.ticker,
+    p.quantita,
+    p.costo_investito_eur,
+    pr.price AS last_price,
+    (round((((p.quantita)::double precision * pr.price))::numeric, 2))::double precision AS market_value_attuale
+   FROM (v_portfolio_positions p
+     LEFT JOIN etf_prices pr ON (((pr.ticker)::text = (p.ticker)::text)));;"
+VIEW,v_rendimento_cedole,"CREATE OR REPLACE VIEW v_rendimento_cedole AS  SELECT sum(importo_euro) AS sum,
+    descrizione
+   FROM transaction
+  WHERE (((ticker)::text ~~ 'M.%'::text) AND ((tipo_operazione)::text <> 'Acquisto'::text))
+  GROUP BY descrizione
+  ORDER BY descrizione;;"
+VIEW,v_top_3_etf_guadagni,"CREATE OR REPLACE VIEW v_top_3_etf_guadagni AS  SELECT ticker,
+    costo_investito_eur,
+    market_value_attuale,
+    guadagno_eur,
+    guadagno_pct
+   FROM v_etf_performance
+  WHERE (guadagno_pct IS NOT NULL)
+  ORDER BY guadagno_pct DESC, market_value_attuale DESC, ticker
+ LIMIT 3;;"
+VIEW,v_tx_normalized,"CREATE OR REPLACE VIEW v_tx_normalized AS  SELECT id,
+    data_operazione,
+    data_valuta,
+    tipo_operazione,
+    ticker,
+    isin,
+    protocollo,
+    descrizione,
+    importo_euro,
+    importo_divisa,
+    divisa,
+    riferimento_ordine,
+    created_at,
+    updated_at,
+    quantita,
+        CASE
+            WHEN ((tipo_operazione)::text ~~* ANY (ARRAY['%vend%'::text, '%sell%'::text, '%rimbor%'::text, '%redem%'::text])) THEN (- COALESCE(quantita, (0)::numeric))
+            ELSE COALESCE(quantita, (0)::numeric)
+        END AS quantita_signed,
+        CASE
+            WHEN ((tipo_operazione)::text ~~* ANY (ARRAY['%vend%'::text, '%sell%'::text, '%rimbor%'::text, '%redem%'::text])) THEN (- abs(COALESCE(importo_euro, (0)::numeric)))
+            ELSE abs(COALESCE(importo_euro, (0)::numeric))
+        END AS cashflow_eur_signed
+   FROM transaction t;;"
+TABLE,etf_correlations,"CREATE TABLE IF NOT EXISTS etf_correlations (  id integer NOT NULL DEFAULT nextval('etf_correlations_id_seq'::regclass),
+  etf_symbol_1 character varying NOT NULL,
+  etf_symbol_2 character varying NOT NULL,
+  correlation_coefficient numeric NOT NULL,
+  sample_size integer NOT NULL,
+  calculation_date timestamp without time zone DEFAULT now(),
+  period_start date NOT NULL,
+  period_end date NOT NULL
+);"
+TABLE,etf_holdings,"CREATE TABLE IF NOT EXISTS etf_holdings (  id bigint NOT NULL,
+  etf_ticker text NOT NULL,
+  ticker text NOT NULL,
+  nome text NOT NULL,
+  settore text,
+  asset_class text,
+  ponderazione double precision,
+  area_geografica text,
+  cambio text,
+  valuta_mercato text,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);"
+TABLE,etf_price_history,"CREATE TABLE IF NOT EXISTS etf_price_history (  ticker character varying NOT NULL,
+  date date NOT NULL,
+  close numeric NOT NULL
+);"
+TABLE,etf_prices,"CREATE TABLE IF NOT EXISTS etf_prices (  id bigint NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  ticker character varying NOT NULL,
+  price double precision
+);"
+TABLE,transaction,"CREATE TABLE IF NOT EXISTS transaction (  id bigint NOT NULL,
+  data_operazione date NOT NULL,
+  data_valuta date,
+  tipo_operazione character varying,
+  ticker character varying NOT NULL,
+  isin character varying,
+  protocollo numeric NOT NULL,
+  descrizione character varying,
+  importo_euro numeric,
+  importo_divisa numeric,
+  divisa character varying,
+  riferimento_ordine character varying NOT NULL,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  quantita numeric,
+  intermediario text
+);"
