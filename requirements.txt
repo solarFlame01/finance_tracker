@@ -7,4 +7,3 @@ python-dotenv
 unidecode
 yfinance
 numpy
-psycopg2
