@@ -3,16 +3,16 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 import numpy as np
-
+import logging
 def aggiorna_prezzi_eft():
     """
     Aggiorna i prezzi correnti di tutti gli ETF
     """
     from database import get_etf_list, insert_update_etf_price
     from finance_info import get_etf_price
-    import logging
     
     logger = logging.getLogger(__name__)
+    
     logger.info("Inizio aggiornamento prezzi ETF")
     
     etf_list = get_etf_list()
@@ -432,5 +432,3 @@ def calculate_all_etf_correlations():
     logging.info(f"Calcolo completato: {stats['successful']}/{stats['total_pairs']} correlazioni salvate")
     
     return stats
-
-get_all_etf_history("MB28")

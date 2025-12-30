@@ -59,7 +59,7 @@ def render_dashboard():
 
     if st.session_state.etf_transactions:
         # Tab per organizzare le sezioni
-        tab1, tab2, tab4, tab5, tab6, tab7, tab8 = st.tabs(["📈 Riepilogo", "📊 Analisi", "⚙️ Impostazioni", "🎯 Metriche", "➕ Inserisci Transazione", "🏆 Rendimento annuo", "🏦 Bond Tracker"])
+        tab1, tab2, tab5,tab8, tab7, tab6, tab4  = st.tabs(["📈 Riepilogo", "📊 Analisi","🎯 Metriche","🏦 Bond Tracker", "🏆 Rendimento annuo","➕ Inserisci Transazione", "⚙️ Impostazioni" ])
         
         # ===== TAB 1: RIEPILOGO =====
         with tab1:

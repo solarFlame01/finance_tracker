@@ -183,7 +183,21 @@ def get_portfolio_kpi_etf():
     except Exception as e:
         logging.error(f"Errore durante il recupero delle KPI del portafoglio ETF: {e}")
         return []
-
+    
+def get_rendimento_annuo():
+    """
+    Recupera i dati di rendimento annuo dal database Supabase.
+    
+    Ritorna:
+        list: Lista di dizionari contenenti i dati di rendimento annuo
+    """
+    try:
+        response = supabase.table("v_portafoglio_rendimento_annuo").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del rendimento annuo: {e}")
+        return []
+    
 def get_etf_list():
     """
     Recupera tutti i ticker distinti dalla tabella "etf_holdings" nel database Supabase.

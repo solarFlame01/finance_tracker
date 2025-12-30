@@ -22,11 +22,78 @@ def insert_transaction(data: dict):
 
 
 def render_bond_tracker():
-    st.markdown("<h1 style='text-align: center; margin-bottom: 30px;'>🇪🇺 Bond Tracker</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; margin-bottom: 30px;'>Bond Tracker</h1>", unsafe_allow_html=True)
 
-    # Form per inserimento nuova transazione
-    st.markdown("<div class='section-title'>➕ Nuova Transazione</div>", unsafe_allow_html=True)
+    # Prima tabella: Guadagno netto da cedole
+    st.markdown("<div class='section-title'>💰 Guadagno netto da cedole</div>", unsafe_allow_html=True)
     
+    if 'rendimento_cedole' in st.session_state and st.session_state.rendimento_cedole:
+        df_cedole = pd.DataFrame(st.session_state.rendimento_cedole)
+        
+        st.dataframe(
+            df_cedole,
+            column_config={
+                "sum": st.column_config.NumberColumn(
+                    "Guadagno netto da cedole",
+                    format="€ %.2f"
+                ),
+                "descrizione": st.column_config.TextColumn(
+                    "Descrizione Bond"
+                )
+            },
+            hide_index=True,
+            use_container_width=True
+        )
+    else:
+        st.info("Nessun dato disponibile per le cedole")
+    
+    # Seconda tabella: Transazioni Bond
+    st.markdown("<div class='section-title'>📊 Transazioni</div>", unsafe_allow_html=True)
+
+    if 'bond_transactions' in st.session_state and st.session_state.bond_transactions:
+        df_transactions = pd.DataFrame(st.session_state.bond_transactions)
+        
+        column_config = {
+            "data_operazione": st.column_config.DateColumn(
+                "Data Operazione",
+                format="DD/MM/YYYY"
+            ),
+            "data_valuta": st.column_config.DateColumn(
+                "Data Valuta",
+                format="DD/MM/YYYY"
+            ),
+            "tipo_operazione": st.column_config.TextColumn("Tipo"),
+            "ticker": st.column_config.TextColumn("Ticker"),
+            "isin": st.column_config.TextColumn("ISIN"),
+            "descrizione": st.column_config.TextColumn("Descrizione"),
+            "importo_euro": st.column_config.NumberColumn(
+                "Importo (€)",
+                format="€ %.2f"
+            ),
+            "importo_divisa": st.column_config.NumberColumn(
+                "Importo Divisa",
+                format="%.2f"
+            ),
+            "divisa": st.column_config.TextColumn("Divisa"),
+            "quantita": st.column_config.NumberColumn(
+                "Quantità",
+                format="%.0f"
+            ),
+            "intermediario": st.column_config.TextColumn("Intermediario"),
+            "protocollo": st.column_config.TextColumn("Protocollo"),
+            "riferimento_ordine": st.column_config.TextColumn("Rif. Ordine")
+        }
+        
+        st.dataframe(
+            df_transactions,
+            column_config=column_config,
+            hide_index=True,
+            use_container_width=True
+        )
+    else:
+        st.info("Nessuna transazione disponibile")
+    
+    st.markdown("<div class='section-title'>➕ Aggiungi Bond </div>", unsafe_allow_html=True)    
     with st.form(key="transaction_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
         
@@ -172,76 +239,3 @@ def render_bond_tracker():
                     st.rerun()
                 else:
                     st.error(message)
-
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-
-    # Prima tabella: Guadagno netto da cedole
-    st.markdown("<div class='section-title'>💰 Guadagno netto da cedole</div>", unsafe_allow_html=True)
-    
-    if 'rendimento_cedole' in st.session_state and st.session_state.rendimento_cedole:
-        df_cedole = pd.DataFrame(st.session_state.rendimento_cedole)
-        
-        st.dataframe(
-            df_cedole,
-            column_config={
-                "sum": st.column_config.NumberColumn(
-                    "Guadagno netto da cedole",
-                    format="€ %.2f"
-                ),
-                "descrizione": st.column_config.TextColumn(
-                    "Descrizione Bond"
-                )
-            },
-            hide_index=True,
-            use_container_width=True
-        )
-    else:
-        st.info("Nessun dato disponibile per le cedole")
-
-    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-    
-    # Seconda tabella: Transazioni Bond
-    st.markdown("<div class='section-title'>📊 Transazioni</div>", unsafe_allow_html=True)
-
-    if 'bond_transactions' in st.session_state and st.session_state.bond_transactions:
-        df_transactions = pd.DataFrame(st.session_state.bond_transactions)
-        
-        column_config = {
-            "data_operazione": st.column_config.DateColumn(
-                "Data Operazione",
-                format="DD/MM/YYYY"
-            ),
-            "data_valuta": st.column_config.DateColumn(
-                "Data Valuta",
-                format="DD/MM/YYYY"
-            ),
-            "tipo_operazione": st.column_config.TextColumn("Tipo"),
-            "ticker": st.column_config.TextColumn("Ticker"),
-            "isin": st.column_config.TextColumn("ISIN"),
-            "descrizione": st.column_config.TextColumn("Descrizione"),
-            "importo_euro": st.column_config.NumberColumn(
-                "Importo (€)",
-                format="€ %.2f"
-            ),
-            "importo_divisa": st.column_config.NumberColumn(
-                "Importo Divisa",
-                format="%.2f"
-            ),
-            "divisa": st.column_config.TextColumn("Divisa"),
-            "quantita": st.column_config.NumberColumn(
-                "Quantità",
-                format="%.0f"
-            ),
-            "intermediario": st.column_config.TextColumn("Intermediario"),
-            "protocollo": st.column_config.TextColumn("Protocollo"),
-            "riferimento_ordine": st.column_config.TextColumn("Rif. Ordine")
-        }
-        
-        st.dataframe(
-            df_transactions,
-            column_config=column_config,
-            hide_index=True,
-            use_container_width=True
-        )
-    else:
-        st.info("Nessuna transazione disponibile")

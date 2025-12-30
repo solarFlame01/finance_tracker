@@ -302,3 +302,59 @@ TABLE,transaction,"CREATE TABLE IF NOT EXISTS transaction (  id bigint NOT NULL,
   quantita numeric,
   intermediario text
 );"
+VIEW, v_portafoglio_rendimento_annuo, "create view public.v_portafoglio_rendimento_annuo as
+with
+  etf_universe as (
+    select distinct
+      h.etf_ticker as ticker
+    from
+      etf_holdings h
+  ),
+  first_tx as (
+    select
+      t.ticker,
+      min(t.data_operazione) as prima_operazione
+    from
+      transaction t
+    group by
+      t.ticker
+  ),
+  agg as (
+    select
+      min(f.prima_operazione) as prima_operazione_portafoglio,
+      sum(k.costo_investito_eur) as costo_investito_tot_eur,
+      sum(k.market_value_attuale)::numeric as market_value_tot_attuale
+    from
+      v_portfolio_ticker_kpi k
+      join etf_universe u on u.ticker = k.ticker::text
+      join first_tx f on f.ticker::text = k.ticker::text
+    where
+      k.costo_investito_eur is not null
+      and k.market_value_attuale is not null
+  )
+select
+  prima_operazione_portafoglio,
+  CURRENT_DATE - prima_operazione_portafoglio as giorni_investimento,
+  round(costo_investito_tot_eur, 2) as costo_investito_tot_eur,
+  round(market_value_tot_attuale, 2)::double precision as market_value_tot_attuale,
+  round(
+    market_value_tot_attuale - costo_investito_tot_eur,
+    2
+  ) as guadagno_tot_eur,
+  round(
+    100.0 * (
+      power(
+        market_value_tot_attuale / NULLIF(costo_investito_tot_eur, 0::numeric),
+        365.0 / NULLIF(
+          (CURRENT_DATE - prima_operazione_portafoglio)::numeric,
+          0::numeric
+        )
+      ) - 1::numeric
+    ),
+    2
+  )::double precision as rendimento_annuo_pct
+from
+  agg a
+where
+  costo_investito_tot_eur > 0::numeric
+  and prima_operazione_portafoglio is not null;"

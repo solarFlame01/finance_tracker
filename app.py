@@ -15,6 +15,42 @@ from views.rendimento_annuo import render_rendimento_annuo
 from views.impostazioni import render_impostazioni
 from views.simula_eft import render_simula_etf
 from views.sidebar import render_sidebar
+import logging, sys
+# ===== CONFIGURAZIONE LOGGING (PRIMA DI TUTTO) =====
+# Crea directory logs
+Path("logs").mkdir(exist_ok=True)
+
+# Rimuovi handlers esistenti di Streamlit per evitare conflitti
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+# Configura logging con file + console
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
+    datefmt='%d/%m/%Y %H:%M:%S',
+    force=True  # Sovrascrive qualsiasi config precedente
+)
+# ✅ SILENZIA LIBRERIE ESTERNE (solo ERROR o superiore)
+logging.getLogger("streamlit").setLevel(logging.WARNING)
+logging.getLogger("watchdog").setLevel(logging.WARNING)
+logging.getLogger("hpack").setLevel(logging.ERROR)           # ✅ Toglie hpack
+logging.getLogger("httpcore").setLevel(logging.ERROR)        # ✅ Toglie httpcore
+logging.getLogger("httpx").setLevel(logging.ERROR)           # ✅ Toglie httpx
+logging.getLogger("urllib3").setLevel(logging.ERROR)         # ✅ Toglie urllib3
+logging.getLogger("requests").setLevel(logging.ERROR)        # ✅ Toglie requests
+logging.getLogger("yfinance").setLevel(logging.WARNING)      # ✅ Riduce yfinance
+logging.getLogger("peewee").setLevel(logging.WARNING)        # ✅ Se usi Peewee
+logging.getLogger("supabase").setLevel(logging.WARNING)      # ✅ Se usi Supabase
+# Riduci il rumore di Streamlit stesso (opzionale)
+logging.getLogger("streamlit").setLevel(logging.WARNING)
+logging.getLogger("watchdog").setLevel(logging.WARNING)
+
+# Logger principale dell'app
+logger = logging.getLogger(__name__)
+logger.info("🚀 App Streamlit avviata")
+# ===== FINE CONFIGURAZIONE LOGGING =====
+
 # Configurazione pagina
 st.set_page_config(
     page_title="ETF Portfolio Tracker",
@@ -22,6 +58,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"  # Mostra la sidebar di default
 )
+
 # Login minimale (come già avevi)
 def require_login(ttl: int = 3600):
     """Simple password based login with a short-lived cache.
@@ -114,7 +151,7 @@ def require_login(ttl: int = 3600):
             st.error("Password errata")
     st.stop()
     
-# require_login()
+require_login()
 # Inizializzazione session state
 if 'etf_data' not in st.session_state:
     st.session_state.etf_data = load_etf_data()
@@ -169,6 +206,10 @@ if 'rendimento_cedole' not in st.session_state:
 if 'bond_transactions' not in st.session_state:
     from database import get_bond_transactions
     st.session_state.bond_transactions = get_bond_transactions()
+    
+if 'rendimento_annuo' not in st.session_state:
+    from database import get_rendimento_annuo
+    st.session_state.rendimento_annuo = get_rendimento_annuo()
     
 # Navigazione principale con sidebar menu
 def main():
