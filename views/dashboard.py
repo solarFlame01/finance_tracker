@@ -121,7 +121,7 @@ def render_dashboard():
                          column_order=["ticker", "quantita", "costo_investito_eur", "prezzo_medio_acquisto", "price", "diff_prezzo", "ultima_operazione"],
             column_config={
                 "ticker": st.column_config.TextColumn("Ticker"),
-                "quantita": st.column_config.NumberColumn("Quantità"),
+                "quantita": st.column_config.NumberColumn("Quantità", format="%.0f"),
                 "costo_investito_eur": st.column_config.NumberColumn("Costo Investito €"),
                 "prezzo_medio_acquisto": st.column_config.NumberColumn("Prezzo Medio Acquisto €"),
                 "price": st.column_config.NumberColumn("Prezzo Corrente €"),
@@ -146,7 +146,8 @@ def render_dashboard():
                         'Prezzo di acquisto': '{:.2f}',
                         'Prezzo corrente': '{:.2f}',
                         'Costo': '{:.2f}',
-                        'Market Value': '{:.2f}'
+                        'Market Value': '{:.2f}',
+                        'Quantità': '{:.0f}'
                     })
                 )
 

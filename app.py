@@ -151,7 +151,7 @@ def require_login(ttl: int = 3600):
             st.error("Password errata")
     st.stop()
     
-require_login()
+#require_login()
 # Inizializzazione session state
 if 'etf_data' not in st.session_state:
     st.session_state.etf_data = load_etf_data()

@@ -33,7 +33,7 @@ def render_impostazioni():
                     df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=',', encoding='cp1252')              
                     df_directa = df_directa.replace([np.inf, -np.inf], None).fillna(0)
                     df_directa.columns = [clean_col_name(col) for col in df_directa.columns] # ripulisce i caratteri speciali delle colonne
-                    
+                    df_directa, sell = handle_sell_data(df_directa)
                     from database import insert_directa_transaction  # Importa la funzione dal modulo database
 
                     with st.spinner("⏳ Caricamento dati in corso..."):
@@ -156,3 +156,48 @@ def render_impostazioni():
                         os.remove(ETF_DETAILS_FILE)
                     st.success("✅ Tutti i dati sono stati resettati!")
                     st.rerun()
+                    
+def handle_sell_data(df):
+    # 1) Ordino tutto per data (serve al FIFO)
+    df = df.sort_values("data_operazione")
+
+    # 2) Separo le vendite e rimuovo le righe di vendita dal df principale
+    df_vendite = df[df["tipo_operazione"] == "Vendita"].copy()
+    df_vendite["profitto"] = 0.0  # Inizializza colonna profitto
+    df = df[df["tipo_operazione"] == "Acquisto"].copy()
+
+    # 3) Per ogni vendita, scarico le quantita dagli acquisti dello stesso ticker in FIFO
+    for idx_vendita, vendita in df_vendite.iterrows():
+        ticker = vendita["ticker"]
+        da_vendere = vendita["quantita"]
+        prezzo_vendita = vendita["importo_euro"]
+        profitto_totale = 0.0
+
+        # solo acquisti dello stesso ticker, in ordine di data (già ordinato sopra)
+        mask = (df["ticker"] == ticker)
+        idx_acquisti = df[mask].index
+
+        for idx in idx_acquisti:
+            if da_vendere <= 0:
+                break
+
+            q_acq = df.at[idx, "quantita"]
+            prezzo_acq = df.at[idx, "importo_euro"]
+
+            if q_acq > da_vendere:
+                # consumo parzialmente questa riga di acquisto
+                profitto_parziale = (prezzo_vendita + prezzo_acq) * da_vendere # le vendite sono con il meno, quindi devo sommare
+                profitto_totale += profitto_parziale
+                df.at[idx, "quantita"] = q_acq - da_vendere
+                da_vendere = 0
+            else:
+                # consumo completamente questa riga di acquisto e la elimino
+                profitto_parziale = (prezzo_vendita + prezzo_acq) * q_acq # le vendite sono con il meno, quindi devo sommare
+                profitto_totale += profitto_parziale
+                da_vendere -= q_acq
+                df = df.drop(idx)
+        
+        # Aggiorna il profitto nella riga di vendita
+        df_vendite.at[idx_vendita, "profitto"] = profitto_totale
+    
+    return df, df_vendite
