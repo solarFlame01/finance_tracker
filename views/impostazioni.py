@@ -30,7 +30,7 @@ def render_impostazioni():
             
             if uploaded_directa is not None:
                 try:
-                    df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=',', encoding='cp1252')              
+                    df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=';', encoding='utf-8-sig', decimal=',', parse_dates=['Data operazione', 'Data valuta'], dayfirst=True)              
                     df_directa = df_directa.replace([np.inf, -np.inf], None).fillna(0)
                     df_directa.columns = [clean_col_name(col) for col in df_directa.columns] # ripulisce i caratteri speciali delle colonne
                     df_directa, sell = handle_sell_data(df_directa)

@@ -74,8 +74,8 @@ def insert_directa_transaction(transaction_data):
 
     for row in transaction_data:
         data = {
-            "data_operazione": normalize_data(row.get("data_operazione")),
-            "data_valuta": normalize_data(row.get("data_valuta")),
+            "data_operazione": (row.get("data_operazione")),
+            "data_valuta": (row.get("data_valuta")),
             "tipo_operazione": row.get("tipo_operazione"),
             "ticker": row.get("ticker"),
             "isin": row.get("isin"),
@@ -92,6 +92,22 @@ def insert_directa_transaction(transaction_data):
     # Esegui l'UPSERT in un'unica chiamata fuori dal ciclo
     if batch_data:
         try:
+            import math
+
+            def make_json_serializable(obj):
+                """Converte ricorsivamente tipi non-JSON-serializable in tipi nativi Python."""
+                if isinstance(obj, pd.Timestamp):
+                    return obj.isoformat() if not pd.isna(obj) else None
+                if isinstance(obj, float) and math.isnan(obj):
+                    return None
+                return obj
+
+            # Prima dell'upsert, sanitizza ogni record
+            batch_data = [
+                {k: make_json_serializable(v) for k, v in record.items()}
+                for record in batch_data
+            ]
+
             # on_conflict: indica la colonna (o le colonne) che devono essere uniche.
             # ignore_duplicates=True: se trova un conflitto, NON aggiorna e NON dà errore, semplicemente ignora la riga.
             response = supabase.table("transaction").upsert(
