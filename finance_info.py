@@ -157,9 +157,10 @@ def get_etf_price(ticker):
     """
     Recupera il prezzo corrente di un ETF da Yahoo Finance.
     Prova prima con il suffisso .MI (mercato italiano), se non disponibile prova con .DE (mercato tedesco).
+    Ottimizzato per evitare blocchi IP su cloud (Streamlit Sharing/Cloud) interrogando preferibilmente lo storico.
     
     Args:
-        ticker (str): Il ticker dell'ETF (es: 'CSPXJ', 'EIMI', etc.)
+        ticker (str): Il ticker dell'ETF (es: 'CSPX', 'EIMI', etc.)
     
     Returns:
         float: Il prezzo corrente dell'ETF
@@ -172,21 +173,18 @@ def get_etf_price(ticker):
             full_ticker = ticker + suffix
             etf = yf.Ticker(full_ticker)
             
-            # Tenta di ottenere il prezzo corrente
+            # 1. Prova a scaricare lo storico recente (robusto sui server cloud)
+            hist = etf.history(period='5d')
+            if not hist.empty:
+                price = hist['Close'].iloc[-1]
+                if price is not None and price != 0:
+                    return float(price)
+            
+            # 2. Se lo storico fallisce o è vuoto, tenta con .info come fallback
             info = etf.info
-            
-            # Prova diverse chiavi per il prezzo corrente
             price = info.get('currentPrice') or info.get('regularMarketPrice')
-            
-            if price is None or price == 0:
-                # Se non trova currentPrice, prova con i dati storici più recenti
-                hist = etf.history(period='1d')
-                if not hist.empty:
-                    price = hist['Close'].iloc[-1]
-            
-            # Se il prezzo è trovato, ritorna
             if price is not None and price != 0:
-                return price
+                return float(price)
         
         except Exception as e:
             print(f"⚠️  {ticker}{suffix} non disponibile: {str(e)}")
