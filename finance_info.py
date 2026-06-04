@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import logging
+from time import sleep
 def aggiorna_prezzi_eft():
     """
     Aggiorna i prezzi correnti di tutti gli ETF
@@ -22,6 +23,8 @@ def aggiorna_prezzi_eft():
     for etf in etf_list:
         etf_ticker = etf.get('etf_ticker') if isinstance(etf, dict) else etf
         logger.debug(f"Elaborazione ETF: {etf_ticker}")
+        
+        sleep(3)
         
         price = get_etf_price(etf_ticker)
         if price is not None:
