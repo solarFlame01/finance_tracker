@@ -290,8 +290,11 @@ def get_correlation_between_two_etfs(etf1_ticker: str, etf2_ticker: str):
         return f"Errore: ETF '{etf2_ticker}' non trovato nel database."
         
     # 3. Filtra i dati solo per i due ETF di interesse
-    filtered_df = all_history_df[all_history_df['ticker'].isin([etf1_ticker, etf2_ticker])]
+    filtered_df = all_history_df[all_history_df['ticker'].isin([etf1_ticker, etf2_ticker])].copy()
     filtered_df['date'] = pd.to_datetime(filtered_df['date'])
+    
+    # Rimuovi eventuali record duplicati per lo stesso ticker nello stesso giorno
+    filtered_df = filtered_df.drop_duplicates(subset=['date', 'ticker'], keep='last')
 
     # 4. Pivot dei dati per avere i prezzi su colonne separate
     prices_pivot = filtered_df.pivot(index='date', columns='ticker', values='close')
