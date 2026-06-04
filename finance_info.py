@@ -64,6 +64,17 @@ def get_all_etf_history(ticker: str, interval: str = "1d") -> pd.DataFrame:
             print(f"🔍 Provo ticker: {full_ticker}")
             
             etf = yf.Ticker(full_ticker)
+            '''
+            Tipologia di Prezzo: Raw Close vs Adjusted Close (Total Return)
+
+            history = etf.history(period="max", interval=interval, auto_adjust=False)
+            
+            auto_adjust=False significa che stai usando i prezzi di chiusura non rettificati per i dividendi.
+            Cosa comporta:
+            - Per gli ETF ad accumulazione (i più comuni in Europa/Italia), non cambia assolutamente nulla poiché i dividendi vengono reinvestiti internamente e si riflettono già nel prezzo della quota.
+            - Per gli ETF a distribuzione, nel giorno dello stacco del dividendo (ex-dividend date) il prezzo dell'ETF cala artificialmente del valore del dividendo distribuito. Questo calo viene registrato come un rendimento giornaliero negativo, che potrebbe sporcare minimamente la correlazione.
+            Suggerimento: Se il tuo portafoglio contiene molti ETF a distribuzione, usare auto_adjust=True (Total Return, che corregge i prezzi storici includendo i dividendi) offrirebbe un calcolo della correlazione teoricamente ancora più preciso.
+            '''
             history = etf.history(
                 period="max",
                 interval=interval,

@@ -378,6 +378,9 @@ def render_metriche():
                 mask = np.triu(np.ones_like(corr_matrix, dtype=bool), k=1)
                 correlations_values = corr_matrix.where(mask).stack().values
                 
+                # Rimuovi esplicitamente i valori NaN per evitare errori nei calcoli di NumPy
+                correlations_values = correlations_values[~np.isnan(correlations_values)]
+                
                 col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                 
                 with col_stat1:
