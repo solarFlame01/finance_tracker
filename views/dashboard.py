@@ -59,7 +59,7 @@ def render_dashboard():
 
     if st.session_state.etf_transactions:
         # Tab per organizzare le sezioni
-        tab1, tab2, tab5,tab8, tab7, tab6, tab4  = st.tabs(["📈 Riepilogo", "📊 Analisi","🎯 Metriche","🏦 Bond Tracker", "🏆 Rendimento annuo","➕ Inserisci Transazione", "⚙️ Impostazioni" ])
+        tab1, tab2, tab5,tab8, tab7, tab9, tab6, tab4  = st.tabs(["📈 Riepilogo", "📊 Analisi","🎯 Metriche","🏦 Bond Tracker", "🏆 Rendimento annuo", "💼 Prossimo PAC","➕ Inserisci Transazione", "⚙️ Impostazioni" ])
         
         # ===== TAB 1: RIEPILOGO =====
         with tab1:
@@ -332,6 +332,10 @@ def render_dashboard():
         with tab7:
             from views.rendimento_annuo import render_rendimento_annuo
             render_rendimento_annuo()
+        # ==== TAB PROSSIMO PAC ====
+        with tab9:
+            from views.prossimo_pac import render_prossimo_pac
+            render_prossimo_pac()
         # ==== TAB BOND TRACKER ====
         with tab8:
             render_bond_tracker()

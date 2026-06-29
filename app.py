@@ -14,6 +14,7 @@ from views.metriche import render_metriche
 from views.rendimento_annuo import render_rendimento_annuo
 from views.impostazioni import render_impostazioni
 from views.simula_eft import render_simula_etf
+from views.prossimo_pac import render_prossimo_pac
 from views.sidebar import render_sidebar
 import logging, sys
 # ===== CONFIGURAZIONE LOGGING (PRIMA DI TUTTO) =====
@@ -151,7 +152,7 @@ def require_login(ttl: int = 3600):
             st.error("Password errata")
     st.stop()
     
-#require_login()
+require_login()
 # Inizializzazione session state
 if 'etf_data' not in st.session_state:
     st.session_state.etf_data = load_etf_data()
@@ -233,6 +234,8 @@ def main():
         render_impostazioni()
     elif st.session_state.page == "simula_etf":
         render_simula_etf()
+    elif st.session_state.page == "prossimo_pac":
+        render_prossimo_pac()
         
     # Footer
     st.divider()
