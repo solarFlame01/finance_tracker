@@ -67,10 +67,12 @@ def render_dashboard():
             if st.button("🔄 Aggiorna Prezzi", use_container_width=True):
                 from finance_info import aggiorna_prezzi_eft
                 aggiorna_prezzi_eft()
-            # Calcolo metriche
+            # Calcolo metriche (escludi obbligazioni con ticker M.)
             df_transaction = pd.DataFrame(st.session_state.etf_transactions)
-            costo_totale = df_transaction['Costo'].sum() if 'Costo' in df_transaction.columns else 0
-            market_value_totale = df_transaction['Market Value'].sum() if 'Market Value' in df_transaction.columns else 0
+            ticker_col = 'Ticker' if 'Ticker' in df_transaction.columns else 'ticker' if 'ticker' in df_transaction.columns else None
+            df_etf_only = df_transaction[~df_transaction[ticker_col].str.startswith('M.', na=False)] if ticker_col else df_transaction
+            costo_totale = df_etf_only['Costo'].sum() if 'Costo' in df_etf_only.columns else 0
+            market_value_totale = df_etf_only['Market Value'].sum() if 'Market Value' in df_etf_only.columns else 0
             crescita_totale = market_value_totale - costo_totale
             rendimento_perc = (crescita_totale / costo_totale * 100) if costo_totale > 0 else 0
             
