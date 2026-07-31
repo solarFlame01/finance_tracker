@@ -33,6 +33,11 @@ def render_impostazioni():
                     df_directa = pd.read_csv(uploaded_directa, skiprows=9, sep=';', encoding='utf-8-sig', decimal=',', parse_dates=['Data operazione', 'Data valuta'], dayfirst=True)              
                     df_directa = df_directa.replace([np.inf, -np.inf], None).fillna(0)
                     df_directa.columns = [clean_col_name(col) for col in df_directa.columns] # ripulisce i caratteri speciali delle colonne
+                    righe_iniziali = len(df_directa)
+                    df_directa = df_directa.drop_duplicates().reset_index(drop=True) # elimina le righe duplicate (tutti i campi uguali)
+                    duplicati_rimossi = righe_iniziali - len(df_directa)
+                    if duplicati_rimossi > 0:
+                        st.warning(f"⚠️ Rimosse {duplicati_rimossi} righe duplicate")
                     df_directa, sell = handle_sell_data(df_directa)
                     from database import insert_directa_transaction  # Importa la funzione dal modulo database
 
