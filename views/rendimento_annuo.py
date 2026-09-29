@@ -15,7 +15,50 @@ def render_rendimento_annuo():
     
     # Converti in DataFrame
     df_portafoglio = pd.DataFrame(st.session_state.rendimento_annuo)
-    
+
+    # Se il DataFrame è vuoto (vista senza righe) mostra un avviso chiaro
+    if df_portafoglio.empty:
+        st.warning("⚠️ La vista v_portafoglio_rendimento_annuo non ha restituito righe. Verifica di avere transazioni e KPI validi.")
+        return
+
+    # Normalizza i nomi colonna: minuscolo, senza spazi
+    df_portafoglio.columns = [str(c).strip().lower() for c in df_portafoglio.columns]
+
+    # Mappa di alias per gestire eventuali varianti di naming provenienti dalla vista
+    aliases = {
+        "prima_operazione_portafoglio": [
+            "prima_operazione_portafoglio", "prima_operazione", "data_inizio",
+            "data_prima_operazione",
+        ],
+        "costo_investito_tot_eur": [
+            "costo_investito_tot_eur", "costo_investito_eur", "costo_investito_totale_eur",
+            "costo_investito_tot", "costo_investito",
+        ],
+        "market_value_tot_attuale": [
+            "market_value_tot_attuale", "market_value_attuale", "market_value_totale_attuale",
+            "valore_attuale_tot", "valore_attuale",
+        ],
+        "guadagno_tot_eur": [
+            "guadagno_tot_eur", "guadagno_eur", "guadagno_totale_eur",
+            "guadagno_tot", "guadagno",
+        ],
+        "rendimento_annuo_pct": [
+            "rendimento_annuo_pct", "rendimento_annuo", "cagr_pct", "cagr",
+        ],
+    }
+
+    # Rinomina le colonne trovate verso il nome canonico atteso
+    rename_map = {}
+    for canonical, candidates in aliases.items():
+        if canonical in df_portafoglio.columns:
+            continue
+        for candidate in candidates:
+            if candidate in df_portafoglio.columns:
+                rename_map[candidate] = canonical
+                break
+    if rename_map:
+        df_portafoglio = df_portafoglio.rename(columns=rename_map)
+
     # Verifica colonne richieste
     required_cols = [
         "prima_operazione_portafoglio",
@@ -25,10 +68,16 @@ def render_rendimento_annuo():
         "rendimento_annuo_pct"
     ]
     missing_cols = [col for col in required_cols if col not in df_portafoglio.columns]
-    
+
     if missing_cols:
         st.error(f"❌ Colonne mancanti: {', '.join(missing_cols)}")
         st.write("Colonne disponibili:", df_portafoglio.columns.tolist())
+        st.info(
+            "Suggerimento: la vista `v_portafoglio_rendimento_annuo` deve esporre le colonne "
+            "prima_operazione_portafoglio, costo_investito_tot_eur, market_value_tot_attuale, "
+            "guadagno_tot_eur, rendimento_annuo_pct. Se i dati sono stati caricati prima della "
+            "creazione della vista, ricarica la pagina per aggiornare la cache."
+        )
         return
     
     # Estrai primo (e unico) record

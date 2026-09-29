@@ -69,6 +69,9 @@ def render_dashboard():
                 aggiorna_prezzi_eft()
             # Calcolo metriche (escludi obbligazioni con ticker M.)
             df_transaction = pd.DataFrame(st.session_state.etf_transactions)
+            with st.expander("🐛 DEBUG", expanded=True):
+                st.write("Ticker e Costo di ogni riga:")
+                st.dataframe(df_transaction[['Ticker', 'Costo', 'Market Value']])
             ticker_col = 'Ticker' if 'Ticker' in df_transaction.columns else 'ticker' if 'ticker' in df_transaction.columns else None
             df_etf_only = df_transaction[~df_transaction[ticker_col].str.startswith('M.', na=False)] if ticker_col else df_transaction
             costo_totale = df_etf_only['Costo'].sum() if 'Costo' in df_etf_only.columns else 0
