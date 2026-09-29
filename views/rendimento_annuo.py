@@ -1,154 +1,151 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from datetime import datetime, timedelta
+
+
+def _carica_rendimento_annuo():
+    """Restituisce i dati annuali (lista di dict) dalla vista v_portafoglio_rendimento_annuo."""
+    dati = st.session_state.get("rendimento_annuo")
+    if dati:
+        return dati
+    try:
+        from database import get_rendimento_annuo
+        dati = get_rendimento_annuo()
+        st.session_state.rendimento_annuo = dati
+        return dati
+    except Exception:
+        return []
+
+
+def _carica_kpi_portafoglio():
+    """Restituisce le KPI per ticker (lista di dict) dalla vista v_portfolio_ticker_kpi.
+
+    Usato per calcolare il TOTALE reale del portafoglio (costo, valore, guadagno),
+    perche' la vista annuale non fornisce un valore attuale affidabile per l'anno in corso.
+    """
+    dati = st.session_state.get("kpi_etf")
+    if dati:
+        return dati
+    try:
+        from database import get_portfolio_kpi_etf
+        dati = get_portfolio_kpi_etf()
+        st.session_state.kpi_etf = dati
+        return dati
+    except Exception:
+        return []
 
 
 # Sezione Rendimento Portafoglio
 def render_rendimento_annuo():
     st.header("📅 Performance Portafoglio")
-    
-    # Recupera dati da session_state
-    if "rendimento_annuo" not in st.session_state or not st.session_state.rendimento_annuo:
-        st.warning("⚠️ Nessun dato di rendimento disponibile. Carica i dati della vista v_portafoglio_rendimento_annuo.")
-        return
-    
-    # Converti in DataFrame
-    df_portafoglio = pd.DataFrame(st.session_state.rendimento_annuo)
 
-    # Se il DataFrame è vuoto (vista senza righe) mostra un avviso chiaro
-    if df_portafoglio.empty:
-        st.warning("⚠️ La vista v_portafoglio_rendimento_annuo non ha restituito righe. Verifica di avere transazioni e KPI validi.")
+    # --- Dati annuali (dettaglio per anno) ---
+    dati_annuali = _carica_rendimento_annuo()
+    if not dati_annuali:
+        st.warning("⚠️ Nessun dato annuale disponibile dalla vista v_portafoglio_rendimento_annuo.")
         return
 
-    # Normalizza i nomi colonna: minuscolo, senza spazi
-    df_portafoglio.columns = [str(c).strip().lower() for c in df_portafoglio.columns]
+    df = pd.DataFrame(dati_annuali)
+    df.columns = [str(c).strip().lower() for c in df.columns]
 
-    # Mappa di alias per gestire eventuali varianti di naming provenienti dalla vista
-    aliases = {
-        "prima_operazione_portafoglio": [
-            "prima_operazione_portafoglio", "prima_operazione", "data_inizio",
-            "data_prima_operazione",
-        ],
-        "costo_investito_tot_eur": [
-            "costo_investito_tot_eur", "costo_investito_eur", "costo_investito_totale_eur",
-            "costo_investito_tot", "costo_investito",
-        ],
-        "market_value_tot_attuale": [
-            "market_value_tot_attuale", "market_value_attuale", "market_value_totale_attuale",
-            "valore_attuale_tot", "valore_attuale",
-        ],
-        "guadagno_tot_eur": [
-            "guadagno_tot_eur", "guadagno_eur", "guadagno_totale_eur",
-            "guadagno_tot", "guadagno",
-        ],
-        "rendimento_annuo_pct": [
-            "rendimento_annuo_pct", "rendimento_annuo", "cagr_pct", "cagr",
-        ],
-    }
-
-    # Rinomina le colonne trovate verso il nome canonico atteso
-    rename_map = {}
-    for canonical, candidates in aliases.items():
-        if canonical in df_portafoglio.columns:
-            continue
-        for candidate in candidates:
-            if candidate in df_portafoglio.columns:
-                rename_map[candidate] = canonical
-                break
-    if rename_map:
-        df_portafoglio = df_portafoglio.rename(columns=rename_map)
-
-    # Verifica colonne richieste
     required_cols = [
-        "prima_operazione_portafoglio",
-        "costo_investito_tot_eur",
-        "market_value_tot_attuale",
-        "guadagno_tot_eur",
-        "rendimento_annuo_pct"
+        "anno",
+        "costo_acquisti_anno_eur",
+        "valore_fine_anno_eur",
+        "guadagno_anno_eur",
+        "rendimento_annuo_pct",
     ]
-    missing_cols = [col for col in required_cols if col not in df_portafoglio.columns]
-
+    missing_cols = [c for c in required_cols if c not in df.columns]
     if missing_cols:
         st.error(f"❌ Colonne mancanti: {', '.join(missing_cols)}")
-        st.write("Colonne disponibili:", df_portafoglio.columns.tolist())
-        st.info(
-            "Suggerimento: la vista `v_portafoglio_rendimento_annuo` deve esporre le colonne "
-            "prima_operazione_portafoglio, costo_investito_tot_eur, market_value_tot_attuale, "
-            "guadagno_tot_eur, rendimento_annuo_pct. Se i dati sono stati caricati prima della "
-            "creazione della vista, ricarica la pagina per aggiornare la cache."
-        )
+        st.write("Colonne disponibili:", df.columns.tolist())
         return
-    
-    # Estrai primo (e unico) record
-    row = df_portafoglio.iloc[0]
-    
+
     # Conversione tipi
-    data_inizio = pd.to_datetime(row["prima_operazione_portafoglio"])
-    costo_investito = float(row["costo_investito_tot_eur"])
-    valore_attuale = float(row["market_value_tot_attuale"])
-    guadagno_totale = float(row["guadagno_tot_eur"])
-    rendimento_annuo = float(row["rendimento_annuo_pct"])
-    giorni_investimento = int(row.get("giorni_investimento", (datetime.now().date() - data_inizio.date()).days))
-    
-    # Calcoli aggiuntivi
-    anni_investimento = giorni_investimento / 365.25
-    guadagno_pct = (guadagno_totale / costo_investito * 100) if costo_investito > 0 else 0
-    
-    # Layout principale
-    col1, col2, col3 = st.columns([1.2, 1, 1])
-    
-    with col1:
-        st.subheader("📋 Dettagli Portafoglio")
-        
-        # Tabella riepilogativa
-        dettagli_df = pd.DataFrame({
-            "Metrica": [
-                "Data Inizio Investimento",
-                "Giorni Investimento",
-                "Anni Investimento",
-                "Importo Investito",
-                "Valore Attuale",
-                "Guadagno Totale",
-                "Guadagno %",
-                "Rendimento Annuo (CAGR)"
-            ],
-            "Valore": [
-                data_inizio.strftime("%d/%m/%Y"),
-                f"{giorni_investimento:,}",
-                f"{anni_investimento:.2f}",
-                f"€ {costo_investito:,.2f}",
-                f"€ {valore_attuale:,.2f}",
-                f"€ {guadagno_totale:,.2f}",
-                f"{guadagno_pct:.2f}%",
-                f"{rendimento_annuo:.2f}%"
-            ]
-        })
-        
-        st.dataframe(
-            dettagli_df,
-            use_container_width=True,
-            hide_index=True,
-            height="auto"
+    df["anno"] = pd.to_numeric(df["anno"], errors="coerce").astype("Int64")
+    for col in required_cols[1:]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df = df.dropna(subset=["anno"]).sort_values("anno").reset_index(drop=True)
+
+    if df.empty:
+        st.warning("⚠️ Nessun anno valido nei dati di rendimento.")
+        return
+
+    # --- TOTALE reale del portafoglio dalle KPI per ticker ---
+    kpi = _carica_kpi_portafoglio()
+    if kpi:
+        df_kpi = pd.DataFrame(kpi)
+        costo_investito = float(pd.to_numeric(df_kpi["costo_investito_eur"], errors="coerce").sum())
+        valore_attuale = float(pd.to_numeric(df_kpi["market_value_attuale"], errors="coerce").sum())
+        guadagno_totale = valore_attuale - costo_investito
+        fonte_totale = "posizioni attuali (v_portfolio_ticker_kpi)"
+    else:
+        # Fallback: usa i dati annuali (meno affidabile per l'anno in corso)
+        costo_investito = float(df["costo_acquisti_anno_eur"].sum())
+        guadagno_totale = float(df["guadagno_anno_eur"].sum())
+        valore_attuale = costo_investito + guadagno_totale
+        fonte_totale = "somma dati annuali"
+
+    rendimento_totale_pct = (guadagno_totale / costo_investito * 100) if costo_investito > 0 else 0.0
+
+    primo_anno = int(df["anno"].min())
+    ultimo_anno = int(df["anno"].max())
+    numero_anni = ultimo_anno - primo_anno + 1
+
+    # =====================================================================
+    # RIGA 1 - Totali del portafoglio (obiettivo: rendimento annuo totale)
+    # =====================================================================
+    st.subheader("🎯 Rendimento Totale Portafoglio")
+
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric(
+            "Rendimento Totale",
+            f"{rendimento_totale_pct:.2f}%",
+            delta=f"€ {guadagno_totale:,.2f}",
+            delta_color="normal" if guadagno_totale >= 0 else "inverse",
         )
-    
+    with m2:
+        st.metric("Importo Investito", f"€ {costo_investito:,.2f}")
+    with m3:
+        st.metric(
+            "Valore Attuale",
+            f"€ {valore_attuale:,.2f}",
+            delta=f"{'+' if guadagno_totale >= 0 else ''}€ {guadagno_totale:,.2f}",
+            delta_color="normal" if guadagno_totale >= 0 else "inverse",
+        )
+    with m4:
+        st.metric("Periodo", f"{numero_anni} anni", delta=f"{primo_anno}–{ultimo_anno}", delta_color="off")
+
+    st.caption(f"Totale calcolato da: {fonte_totale}")
+
+    st.divider()
+
+    # =====================================================================
+    # RIGA 2 - Dettaglio annuale + grafici
+    # =====================================================================
+    col1, col2, col3 = st.columns([1.3, 1, 1.2])
+
+    with col1:
+        st.subheader("📋 Dettaglio Annuale")
+        dettagli_df = pd.DataFrame({
+            "Anno": df["anno"].astype(int).astype(str),
+            "Acquisti": df["costo_acquisti_anno_eur"].map(lambda v: f"€ {v:,.2f}"),
+            "Valore Fine Anno": df["valore_fine_anno_eur"].map(lambda v: f"€ {v:,.2f}"),
+            "Guadagno": df["guadagno_anno_eur"].map(lambda v: f"€ {v:,.2f}"),
+            "Rend. %": df["rendimento_annuo_pct"].map(lambda v: f"{v:,.2f}%"),
+        })
+        st.dataframe(dettagli_df, use_container_width=True, hide_index=True)
+
     with col2:
         st.subheader("💰 Composizione Valore")
-        
-        # Torta: Costo Investito vs Guadagno
         if guadagno_totale >= 0:
-            colori = ["#1f77b4", "#2ca02c"]  # Blu investito, Verde guadagno
-            etichette = [
-                f"Investito\n€ {costo_investito:,.0f}",
-                f"Guadagno\n€ {guadagno_totale:,.0f}"
-            ]
+            colori = ["#1f77b4", "#2ca02c"]
+            etichette = [f"Investito € {costo_investito:,.0f}", f"Guadagno € {guadagno_totale:,.0f}"]
         else:
-            colori = ["#1f77b4", "#d62728"]  # Blu investito, Rosso perdita
-            etichette = [
-                f"Investito\n€ {costo_investito:,.0f}",
-                f"Perdita\n€ {guadagno_totale:,.0f}"
-            ]
-        
+            colori = ["#1f77b4", "#d62728"]
+            etichette = [f"Investito € {costo_investito:,.0f}", f"Perdita € {guadagno_totale:,.0f}"]
+
         fig_pie = go.Figure(data=[
             go.Pie(
                 values=[costo_investito, abs(guadagno_totale)],
@@ -156,54 +153,29 @@ def render_rendimento_annuo():
                 marker=dict(colors=colori),
                 textposition="inside",
                 textinfo="label+percent",
-                hovertemplate="<b>%{label}</b><br>€ %{value:,.0f}<extra></extra>"
+                hovertemplate="<b>%{label}</b><br>€ %{value:,.0f}<extra></extra>",
             )
         ])
-        
-        fig_pie.update_layout(
-            height=350,
-            showlegend=False,
-            margin=dict(t=20, b=20, l=20, r=20)
-        )
-        
+        fig_pie.update_layout(height=350, showlegend=False, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig_pie, use_container_width=True)
-        
-    with col3:
-        st.subheader("📊 Rendimento Annuo")
 
-        # Estrai solo l'anno dalla data
-        df_portafoglio["anno"] = pd.to_datetime(df_portafoglio["prima_operazione_portafoglio"]).dt.year.astype(str)
-        df_portafoglio["rendimento_annuo_pct"] = pd.to_numeric(
-            df_portafoglio["rendimento_annuo_pct"], errors="coerce"
-        )
-        
-        # Ordina per anno
-        df_portafoglio = df_portafoglio.sort_values("anno", ascending=True)
-        
-        # Colori dinamici: verde per positivo, rosso per negativo
-        colori = [
-            "#2ca02c" if r >= 0 else "#d62728" 
-            for r in df_portafoglio["rendimento_annuo_pct"]
-        ]
-        
+    with col3:
+        st.subheader("📊 Rendimento per Anno")
+        anni = df["anno"].astype(int).astype(str)
+        rendimenti = df["rendimento_annuo_pct"].fillna(0)
+        colori_bar = ["#2ca02c" if r >= 0 else "#d62728" for r in rendimenti]
+
         fig_bars = go.Figure(data=[
             go.Bar(
-                x=df_portafoglio["anno"],
-                y=df_portafoglio["rendimento_annuo_pct"],
-                marker=dict(color=colori),
-                text=[f"{r:.2f}%" for r in df_portafoglio["rendimento_annuo_pct"]],
+                x=anni,
+                y=rendimenti,
+                marker=dict(color=colori_bar),
+                text=[f"{r:.2f}%" for r in rendimenti],
                 textposition="outside",
-                hovertemplate="<b>%{x}</b><br>Rendimento: %{y:.2f}%<extra></extra>"
+                hovertemplate="<b>%{x}</b><br>Rendimento: %{y:.2f}%<extra></extra>",
             )
         ])
-        
-        fig_bars.add_hline(
-            y=0,
-            line_dash="dash",
-            line_color="gray",
-            opacity=0.5
-        )
-        
+        fig_bars.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5)
         fig_bars.update_layout(
             height=350,
             yaxis_title="Rendimento %",
@@ -211,61 +183,25 @@ def render_rendimento_annuo():
             showlegend=False,
             hovermode="x unified",
             template="plotly_white",
-            margin=dict(b=50, t=50, l=50, r=50)
+            margin=dict(b=50, t=50, l=50, r=50),
         )
-        
         st.plotly_chart(fig_bars, use_container_width=True)
 
-    # Statistiche principali
-    st.subheader("📊 Statistiche Principali")
-    
-    stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
-    
-    with stat_col1:
-        delta_color = "normal" if guadagno_totale >= 0 else "inverse"
-        st.metric(
-            "Guadagno Totale",
-            f"€ {guadagno_totale:,.2f}",
-            delta=f"{guadagno_pct:.2f}%",
-            delta_color=delta_color
-        )
-    
-    with stat_col2:
-        st.metric(
-            "Rendimento Annuo",
-            f"{rendimento_annuo:.2f}%",
-            delta=f"CAGR",
-            delta_color="off"
-        )
-    
-    with stat_col3:
-        st.metric(
-            "Valore Attuale",
-            f"€ {valore_attuale:,.2f}",
-            delta=f"+€ {guadagno_totale:,.2f}",
-            delta_color="normal" if guadagno_totale >= 0 else "inverse"
-        )
-    
-    with stat_col4:
-        st.metric(
-            "Periodo Investimento",
-            f"{anni_investimento:.1f} anni",
-            delta=f"{giorni_investimento} giorni",
-            delta_color="off"
-        )
-        
-    # Informazioni dettagliate
-    with st.expander("ℹ️ Spiegazione delle Metriche"):
+    # =====================================================================
+    # Note esplicative
+    # =====================================================================
+    with st.expander("ℹ️ Come vengono calcolate le metriche"):
         st.markdown("""
-        **Guadagno Totale**: Differenza tra il valore attuale e l'importo investito.
-        
-        **Guadagno %**: Rendimento semplice calcolato come (Guadagno / Investito) × 100.
-        
-        **Rendimento Annuo (CAGR)**: 
-        - Compound Annual Growth Rate
-        - Rappresenta il rendimento medio annualizzato dal primo investimento ad oggi
-        - Utile per confrontare con indici di mercato e altre strategie
-        
-        **Giorni/Anni di Investimento**: Tempo totale dal primo acquisto ad oggi.
-        """)
+        **Rendimento Totale**: guadagno complessivo sul portafoglio attualmente detenuto,
+        calcolato come *(Valore Attuale − Importo Investito) / Importo Investito*.
+        Usa il valore di mercato reale delle posizioni (vista `v_portfolio_ticker_kpi`),
+        non il valore di fine anno della vista annuale.
 
+        **Dettaglio Annuale**: per ogni anno mostra gli acquisti effettuati,
+        il valore di fine anno, il guadagno e il rendimento percentuale
+        (vista `v_portafoglio_rendimento_annuo`).
+
+        **Nota sull'anno in corso**: se l'anno corrente non ha ancora un valore di fine
+        anno valorizzato, la sua riga puo' mostrare valore 0 e rendimento -100%. Questo
+        NON influisce sul Rendimento Totale, che si basa sulle posizioni attuali.
+        """)
