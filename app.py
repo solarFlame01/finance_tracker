@@ -211,6 +211,14 @@ if 'bond_transactions' not in st.session_state:
 if 'rendimento_annuo' not in st.session_state:
     from database import get_rendimento_annuo
     st.session_state.rendimento_annuo = get_rendimento_annuo()
+
+if 'rendimento_mensile' not in st.session_state:
+    from database import get_rendimento_mensile
+    st.session_state.rendimento_mensile = get_rendimento_mensile()
+
+if 'rendimento_cumulato' not in st.session_state:
+    from database import get_rendimento_cumulato
+    st.session_state.rendimento_cumulato = get_rendimento_cumulato()
     
 # Navigazione principale con sidebar menu
 def main():

@@ -1,207 +1,279 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from datetime import datetime
+
+MESI_IT = {
+    1: "gen", 2: "feb", 3: "mar", 4: "apr", 5: "mag", 6: "giu",
+    7: "lug", 8: "ago", 9: "set", 10: "ott", 11: "nov", 12: "dic",
+}
+
+MESI_IT_FULL = {
+    1: "gennaio", 2: "febbraio", 3: "marzo", 4: "aprile", 5: "maggio",
+    6: "giugno", 7: "luglio", 8: "agosto", 9: "settembre", 10: "ottobre",
+    11: "novembre", 12: "dicembre",
+}
+
+
+# ---------------------------------------------------------------------------
+# Caricamento dati (con cache in session_state)
+# ---------------------------------------------------------------------------
+def _carica(chiave_state, nome_funzione):
+    """Carica dati da database.py con cache in session_state."""
+    dati = st.session_state.get(chiave_state)
+    if dati:
+        return dati
+    try:
+        import database
+        dati = getattr(database, nome_funzione)()
+        st.session_state[chiave_state] = dati
+        return dati
+    except Exception:
+        return []
+
+
+def _carica_rendimento_mensile():
+    return _carica("rendimento_mensile", "get_rendimento_mensile")
+
+
+def _carica_rendimento_cumulato():
+    return _carica("rendimento_cumulato", "get_rendimento_cumulato")
 
 
 def _carica_rendimento_annuo():
-    """Restituisce i dati annuali (lista di dict) dalla vista v_portafoglio_rendimento_annuo."""
-    dati = st.session_state.get("rendimento_annuo")
-    if dati:
-        return dati
-    try:
-        from database import get_rendimento_annuo
-        dati = get_rendimento_annuo()
-        st.session_state.rendimento_annuo = dati
-        return dati
-    except Exception:
-        return []
+    return _carica("rendimento_annuo", "get_rendimento_annuo")
 
 
-def _carica_kpi_portafoglio():
-    """Restituisce le KPI per ticker (lista di dict) dalla vista v_portfolio_ticker_kpi.
+# ---------------------------------------------------------------------------
+# Grafico principale stile "Performance" (barre mensili + linea cumulata YTD)
+# ---------------------------------------------------------------------------
+def _grafico_performance(df_mese_anno: pd.DataFrame, anno: int):
+    """Barre = rendimento mensile; linea = rendimento cumulato YTD.
 
-    Usato per calcolare il TOTALE reale del portafoglio (costo, valore, guadagno),
-    perche' la vista annuale non fornisce un valore attuale affidabile per l'anno in corso.
+    Mostra sempre tutti e 12 i mesi dell'anno (gen..dic), con buchi
+    per i mesi senza dati, come nel riferimento Bloomberg.
     """
-    dati = st.session_state.get("kpi_etf")
-    if dati:
-        return dati
-    try:
-        from database import get_portfolio_kpi_etf
-        dati = get_portfolio_kpi_etf()
-        st.session_state.kpi_etf = dati
-        return dati
-    except Exception:
-        return []
+    base = pd.DataFrame({"mese": range(1, 13)})
+    df = base.merge(df_mese_anno, on="mese", how="left")
+    df["label"] = df["mese"].map(lambda m: f"{MESI_IT[m]}'{str(anno)[2:]}")
 
+    fig = go.Figure()
 
-# Sezione Rendimento Portafoglio
-def render_rendimento_annuo():
-    st.header("📅 Performance Portafoglio")
-
-    # --- Dati annuali (dettaglio per anno) ---
-    dati_annuali = _carica_rendimento_annuo()
-    if not dati_annuali:
-        st.warning("⚠️ Nessun dato annuale disponibile dalla vista v_portafoglio_rendimento_annuo.")
-        return
-
-    df = pd.DataFrame(dati_annuali)
-    df.columns = [str(c).strip().lower() for c in df.columns]
-
-    required_cols = [
-        "anno",
-        "costo_acquisti_anno_eur",
-        "valore_fine_anno_eur",
-        "guadagno_anno_eur",
-        "rendimento_annuo_pct",
+    # Barre: rendimento mensile
+    colori = [
+        "#1f77b4" if (pd.notna(v) and v >= 0) else "#c0392b"
+        for v in df["rendimento_mensile_pct"]
     ]
-    missing_cols = [c for c in required_cols if c not in df.columns]
-    if missing_cols:
-        st.error(f"❌ Colonne mancanti: {', '.join(missing_cols)}")
-        st.write("Colonne disponibili:", df.columns.tolist())
+    fig.add_trace(go.Bar(
+        x=df["label"],
+        y=df["rendimento_mensile_pct"],
+        name="Rendimento mensile",
+        marker=dict(color=colori),
+        hovertemplate="<b>%{x}</b><br>Mese: %{y:.2f}%<extra></extra>",
+    ))
+
+    # Linea: rendimento cumulato da inizio anno
+    fig.add_trace(go.Scatter(
+        x=df["label"],
+        y=df["rendimento_cumulato_ytd_pct"],
+        name="Cumulato YTD",
+        mode="lines+markers",
+        line=dict(color="#d62728", width=2),
+        marker=dict(symbol="square", size=8, color="#d62728"),
+        connectgaps=True,
+        hovertemplate="<b>%{x}</b><br>Cumulato: %{y:.2f}%<extra></extra>",
+    ))
+
+    fig.add_hline(y=0, line_color="#888", line_width=1)
+    fig.update_layout(
+        title=f"Performance {anno}",
+        height=420,
+        template="plotly_white",
+        yaxis=dict(title="", ticksuffix="%", zeroline=True),
+        xaxis=dict(title=""),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(t=60, b=40, l=50, r=30),
+        hovermode="x unified",
+    )
+    return fig
+
+
+# ---------------------------------------------------------------------------
+# Vista principale
+# ---------------------------------------------------------------------------
+def render_rendimento_annuo():
+    st.header("📈 Performance Portafoglio")
+
+    df_mensile_raw = _carica_rendimento_mensile()
+    if not df_mensile_raw:
+        st.warning(
+            "⚠️ Nessun dato mensile disponibile dalla vista "
+            "`v_portafoglio_rendimento_mensile`. Verifica di avere lo storico "
+            "prezzi (`etf_price_history`) e le transazioni popolati."
+        )
         return
 
-    # Conversione tipi
-    df["anno"] = pd.to_numeric(df["anno"], errors="coerce").astype("Int64")
-    for col in required_cols[1:]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-    df = df.dropna(subset=["anno"]).sort_values("anno").reset_index(drop=True)
+    dfm = pd.DataFrame(df_mensile_raw)
+    for col in ["anno", "mese"]:
+        dfm[col] = pd.to_numeric(dfm[col], errors="coerce").astype("Int64")
+    for col in ["valore_fine_mese_eur", "flusso_netto_eur",
+                "rendimento_mensile_pct", "rendimento_cumulato_ytd_pct"]:
+        dfm[col] = pd.to_numeric(dfm[col], errors="coerce")
+    dfm = dfm.dropna(subset=["anno", "mese"]).sort_values(["anno", "mese"])
 
-    if df.empty:
-        st.warning("⚠️ Nessun anno valido nei dati di rendimento.")
+    # Anno di riferimento: il più recente presente nei dati
+    anni_disponibili = sorted(dfm["anno"].dropna().unique().tolist(), reverse=True)
+    if not anni_disponibili:
+        st.warning("⚠️ Nessun anno valido nei dati mensili.")
         return
 
-    # --- TOTALE reale del portafoglio dalle KPI per ticker ---
-    kpi = _carica_kpi_portafoglio()
-    if kpi:
-        df_kpi = pd.DataFrame(kpi)
-        costo_investito = float(pd.to_numeric(df_kpi["costo_investito_eur"], errors="coerce").sum())
-        valore_attuale = float(pd.to_numeric(df_kpi["market_value_attuale"], errors="coerce").sum())
-        guadagno_totale = valore_attuale - costo_investito
-        fonte_totale = "posizioni attuali (v_portfolio_ticker_kpi)"
-    else:
-        # Fallback: usa i dati annuali (meno affidabile per l'anno in corso)
-        costo_investito = float(df["costo_acquisti_anno_eur"].sum())
-        guadagno_totale = float(df["guadagno_anno_eur"].sum())
-        valore_attuale = costo_investito + guadagno_totale
-        fonte_totale = "somma dati annuali"
+    anno_sel = st.selectbox(
+        "Anno di riferimento",
+        anni_disponibili,
+        index=0,
+        format_func=lambda a: str(int(a)),
+    )
+    anno_sel = int(anno_sel)
 
-    rendimento_totale_pct = (guadagno_totale / costo_investito * 100) if costo_investito > 0 else 0.0
+    df_anno = dfm[dfm["anno"] == anno_sel].copy()
 
-    primo_anno = int(df["anno"].min())
-    ultimo_anno = int(df["anno"].max())
-    numero_anni = ultimo_anno - primo_anno + 1
+    # ---------------- KPI (mese corrente, YTD, since inception) ----------
+    ultimo = df_anno.sort_values("mese").iloc[-1] if not df_anno.empty else None
 
-    # =====================================================================
-    # RIGA 1 - Totali del portafoglio (obiettivo: rendimento annuo totale)
-    # =====================================================================
-    st.subheader("🎯 Rendimento Totale Portafoglio")
+    rend_mese = float(ultimo["rendimento_mensile_pct"]) if ultimo is not None else 0.0
+    rend_ytd = float(ultimo["rendimento_cumulato_ytd_pct"]) if ultimo is not None else 0.0
+    mese_label = (
+        f"{MESI_IT_FULL[int(ultimo['mese'])]} {anno_sel}"
+        if ultimo is not None else f"{anno_sel}"
+    )
 
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric(
-            "Rendimento Totale",
-            f"{rendimento_totale_pct:.2f}%",
-            delta=f"€ {guadagno_totale:,.2f}",
-            delta_color="normal" if guadagno_totale >= 0 else "inverse",
+    # Since inception dalla vista cumulata
+    df_cum_raw = _carica_rendimento_cumulato()
+    rend_inception = 0.0
+    inception_label = ""
+    if df_cum_raw:
+        dfc = pd.DataFrame(df_cum_raw)
+        dfc["rendimento_cumulato_totale_pct"] = pd.to_numeric(
+            dfc["rendimento_cumulato_totale_pct"], errors="coerce"
         )
-    with m2:
-        st.metric("Importo Investito", f"€ {costo_investito:,.2f}")
-    with m3:
-        st.metric(
-            "Valore Attuale",
-            f"€ {valore_attuale:,.2f}",
-            delta=f"{'+' if guadagno_totale >= 0 else ''}€ {guadagno_totale:,.2f}",
-            delta_color="normal" if guadagno_totale >= 0 else "inverse",
-        )
-    with m4:
-        st.metric("Periodo", f"{numero_anni} anni", delta=f"{primo_anno}–{ultimo_anno}", delta_color="off")
+        dfc = dfc.dropna(subset=["rendimento_cumulato_totale_pct"]).sort_values("periodo")
+        if not dfc.empty:
+            rend_inception = float(dfc.iloc[-1]["rendimento_cumulato_totale_pct"])
+    # Data di inizio = prima operazione nota dai dati mensili
+    primo_periodo = dfm.sort_values(["anno", "mese"]).iloc[0]
+    inception_label = (
+        f"dal 01/{int(primo_periodo['mese']):02d}/{int(primo_periodo['anno'])}"
+    )
 
-    st.caption(f"Totale calcolato da: {fonte_totale}")
+    k1, k2, k3 = st.columns(3)
+    with k1:
+        st.metric(f"📆 {mese_label}", f"{rend_mese:+.2f}%")
+    with k2:
+        st.metric(f"🗓️ Dall'inizio dell'anno {anno_sel}", f"{rend_ytd:+.2f}%")
+    with k3:
+        st.metric(f"🚀 Sin dalla nascita {inception_label}", f"{rend_inception:+.2f}%")
 
     st.divider()
 
-    # =====================================================================
-    # RIGA 2 - Dettaglio annuale + grafici
-    # =====================================================================
-    col1, col2, col3 = st.columns([1.3, 1, 1.2])
+    # ---------------- Grafico principale Performance ---------------------
+    df_graf = df_anno[["mese", "rendimento_mensile_pct",
+                       "rendimento_cumulato_ytd_pct"]].copy()
+    st.plotly_chart(
+        _grafico_performance(df_graf, anno_sel),
+        use_container_width=True,
+    )
 
+    st.divider()
+
+    # ---------------- Grafici aggiuntivi ---------------------------------
+    col1, col2 = st.columns(2)
+
+    # 1) Rendimento anno per anno
     with col1:
-        st.subheader("📋 Dettaglio Annuale")
-        dettagli_df = pd.DataFrame({
-            "Anno": df["anno"].astype(int).astype(str),
-            "Acquisti": df["costo_acquisti_anno_eur"].map(lambda v: f"€ {v:,.2f}"),
-            "Valore Fine Anno": df["valore_fine_anno_eur"].map(lambda v: f"€ {v:,.2f}"),
-            "Guadagno": df["guadagno_anno_eur"].map(lambda v: f"€ {v:,.2f}"),
-            "Rend. %": df["rendimento_annuo_pct"].map(lambda v: f"{v:,.2f}%"),
-        })
-        st.dataframe(dettagli_df, use_container_width=True, hide_index=True)
-
-    with col2:
-        st.subheader("💰 Composizione Valore")
-        if guadagno_totale >= 0:
-            colori = ["#1f77b4", "#2ca02c"]
-            etichette = [f"Investito € {costo_investito:,.0f}", f"Guadagno € {guadagno_totale:,.0f}"]
+        st.subheader("📊 Rendimento anno per anno")
+        dati_annuali = _carica_rendimento_annuo()
+        if dati_annuali:
+            dfa = pd.DataFrame(dati_annuali)
+            dfa.columns = [str(c).strip().lower() for c in dfa.columns]
+            if "anno" in dfa.columns and "rendimento_annuo_pct" in dfa.columns:
+                dfa["anno"] = pd.to_numeric(dfa["anno"], errors="coerce")
+                dfa["rendimento_annuo_pct"] = pd.to_numeric(
+                    dfa["rendimento_annuo_pct"], errors="coerce"
+                )
+                dfa = dfa.dropna(subset=["anno"]).sort_values("anno")
+                colori = [
+                    "#1f77b4" if v >= 0 else "#c0392b"
+                    for v in dfa["rendimento_annuo_pct"].fillna(0)
+                ]
+                fig = go.Figure(go.Bar(
+                    x=dfa["anno"].astype(int).astype(str),
+                    y=dfa["rendimento_annuo_pct"],
+                    marker=dict(color=colori),
+                    text=[f"{v:.2f}%" for v in dfa["rendimento_annuo_pct"].fillna(0)],
+                    textposition="outside",
+                    hovertemplate="<b>%{x}</b><br>%{y:.2f}%<extra></extra>",
+                ))
+                fig.add_hline(y=0, line_color="#888", line_width=1)
+                fig.update_layout(
+                    height=360, template="plotly_white",
+                    yaxis=dict(ticksuffix="%"), showlegend=False,
+                    margin=dict(t=20, b=30, l=40, r=20),
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Dati annuali non disponibili nel formato atteso.")
         else:
-            colori = ["#1f77b4", "#d62728"]
-            etichette = [f"Investito € {costo_investito:,.0f}", f"Perdita € {guadagno_totale:,.0f}"]
+            st.info("Nessun dato annuale disponibile.")
 
-        fig_pie = go.Figure(data=[
-            go.Pie(
-                values=[costo_investito, abs(guadagno_totale)],
-                labels=etichette,
-                marker=dict(colors=colori),
-                textposition="inside",
-                textinfo="label+percent",
-                hovertemplate="<b>%{label}</b><br>€ %{value:,.0f}<extra></extra>",
-            )
-        ])
-        fig_pie.update_layout(height=350, showlegend=False, margin=dict(t=20, b=20, l=20, r=20))
-        st.plotly_chart(fig_pie, use_container_width=True)
-
-    with col3:
-        st.subheader("📊 Rendimento per Anno")
-        anni = df["anno"].astype(int).astype(str)
-        rendimenti = df["rendimento_annuo_pct"].fillna(0)
-        colori_bar = ["#2ca02c" if r >= 0 else "#d62728" for r in rendimenti]
-
-        fig_bars = go.Figure(data=[
-            go.Bar(
-                x=anni,
-                y=rendimenti,
-                marker=dict(color=colori_bar),
-                text=[f"{r:.2f}%" for r in rendimenti],
-                textposition="outside",
-                hovertemplate="<b>%{x}</b><br>Rendimento: %{y:.2f}%<extra></extra>",
-            )
-        ])
-        fig_bars.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5)
-        fig_bars.update_layout(
-            height=350,
-            yaxis_title="Rendimento %",
-            xaxis_title="Anno",
-            showlegend=False,
-            hovermode="x unified",
-            template="plotly_white",
-            margin=dict(b=50, t=50, l=50, r=50),
+    # 2) Valore del portafoglio nel tempo (NAV di fine mese)
+    with col2:
+        st.subheader("💶 Valore portafoglio (fine mese)")
+        dfm_graf = dfm.copy()
+        dfm_graf["periodo"] = dfm_graf["anno"].astype(int).astype(str) + "-" + \
+            dfm_graf["mese"].astype(int).map(lambda m: f"{m:02d}")
+        fig = go.Figure(go.Scatter(
+            x=dfm_graf["periodo"],
+            y=dfm_graf["valore_fine_mese_eur"],
+            mode="lines",
+            fill="tozeroy",
+            line=dict(color="#1f77b4", width=2),
+            hovertemplate="<b>%{x}</b><br>€ %{y:,.0f}<extra></extra>",
+        ))
+        fig.update_layout(
+            height=360, template="plotly_white",
+            yaxis=dict(tickprefix="€ "), showlegend=False,
+            margin=dict(t=20, b=30, l=60, r=20),
         )
-        st.plotly_chart(fig_bars, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
-    # =====================================================================
-    # Note esplicative
-    # =====================================================================
+    # ---------------- Tabella dettaglio mensile --------------------------
+    st.subheader(f"📋 Dettaglio mensile {anno_sel}")
+    tab = df_anno.sort_values("mese").copy()
+    tab_display = pd.DataFrame({
+        "Mese": tab["mese"].map(lambda m: MESI_IT_FULL[int(m)].capitalize()),
+        "Valore fine mese": tab["valore_fine_mese_eur"].map(lambda v: f"€ {v:,.2f}"),
+        "Versato nel mese": tab["flusso_netto_eur"].map(lambda v: f"€ {v:,.2f}"),
+        "Rend. mensile": tab["rendimento_mensile_pct"].map(lambda v: f"{v:+.2f}%"),
+        "Cumulato YTD": tab["rendimento_cumulato_ytd_pct"].map(lambda v: f"{v:+.2f}%"),
+    })
+    st.dataframe(tab_display, use_container_width=True, hide_index=True)
+
     with st.expander("ℹ️ Come vengono calcolate le metriche"):
         st.markdown("""
-        **Rendimento Totale**: guadagno complessivo sul portafoglio attualmente detenuto,
-        calcolato come *(Valore Attuale − Importo Investito) / Importo Investito*.
-        Usa il valore di mercato reale delle posizioni (vista `v_portfolio_ticker_kpi`),
-        non il valore di fine anno della vista annuale.
+        **Metodo time-weighted (TWR).** Il rendimento di ogni mese neutralizza
+        l'effetto dei versamenti (PAC), così da misurare la performance reale del
+        portafoglio e non la semplice crescita per nuovi apporti:
 
-        **Dettaglio Annuale**: per ogni anno mostra gli acquisti effettuati,
-        il valore di fine anno, il guadagno e il rendimento percentuale
-        (vista `v_portafoglio_rendimento_annuo`).
+        `r_mese = (NAV_fine − NAV_inizio − versamenti) / (NAV_inizio + versamenti)`
 
-        **Nota sull'anno in corso**: se l'anno corrente non ha ancora un valore di fine
-        anno valorizzato, la sua riga puo' mostrare valore 0 e rendimento -100%. Questo
-        NON influisce sul Rendimento Totale, che si basa sulle posizioni attuali.
+        - **Rendimento mensile** (barre): performance del singolo mese.
+        - **Cumulato YTD** (linea): prodotto composto dei rendimenti mensili da
+          gennaio dell'anno selezionato — `Π(1 + rᵢ) − 1`.
+        - **Sin dalla nascita**: rendimento cumulato composto dalla prima
+          operazione (vista `v_portafoglio_rendimento_cumulato`).
+
+        Il NAV di fine mese valorizza le quote cumulate detenute al prezzo di
+        chiusura di fine mese (vista `v_portafoglio_rendimento_mensile`, basata
+        su `etf_price_history`). I mesi senza prezzo storico disponibile non
+        compaiono nel grafico.
         """)

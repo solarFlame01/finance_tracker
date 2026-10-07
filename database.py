@@ -214,6 +214,54 @@ def get_rendimento_annuo():
         logging.error(f"Errore durante il recupero del rendimento annuo: {e}")
         return []
     
+def get_rendimento_mensile():
+    """
+    Recupera il rendimento mensile (time-weighted) del portafoglio dalla vista
+    v_portafoglio_rendimento_mensile.
+
+    Ogni riga contiene: anno, mese, periodo (YYYY-MM), valore_fine_mese_eur,
+    flusso_netto_eur, rendimento_mensile_pct, rendimento_cumulato_ytd_pct.
+
+    Ritorna:
+        list: Lista di dizionari con il rendimento mensile del portafoglio
+    """
+    try:
+        response = (
+            supabase.table("v_portafoglio_rendimento_mensile")
+            .select("*")
+            .order("periodo")
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del rendimento mensile: {e}")
+        return []
+
+
+def get_rendimento_cumulato():
+    """
+    Recupera il rendimento cumulato "since inception" (time-weighted) del
+    portafoglio dalla vista v_portafoglio_rendimento_cumulato.
+
+    Ogni riga contiene: periodo (YYYY-MM), anno, mese,
+    rendimento_cumulato_totale_pct.
+
+    Ritorna:
+        list: Lista di dizionari con il rendimento cumulato totale del portafoglio
+    """
+    try:
+        response = (
+            supabase.table("v_portafoglio_rendimento_cumulato")
+            .select("*")
+            .order("periodo")
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del rendimento cumulato: {e}")
+        return []
+
+
 def get_etf_list():
     """
     Recupera tutti i ticker distinti dalla tabella "etf_holdings" nel database Supabase.
