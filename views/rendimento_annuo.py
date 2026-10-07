@@ -101,8 +101,47 @@ def _grafico_performance(df_mese_anno: pd.DataFrame, anno: int):
 # ---------------------------------------------------------------------------
 # Vista principale
 # ---------------------------------------------------------------------------
+def _aggiorna_storico_prezzi_ui():
+    """Scarica lo storico prezzi aggiornato e ricarica i dati in session_state."""
+    try:
+        from aggiorna_storico_prezzi import aggiorna_storico
+    except Exception as e:
+        st.error(f"Impossibile avviare l'aggiornamento: {e}")
+        return
+
+    barra = st.progress(0.0, text="Avvio aggiornamento storico prezzi...")
+
+    def _cb(i, tot, ticker, righe):
+        barra.progress(i / tot, text=f"[{i}/{tot}] {ticker}: {righe} righe")
+
+    with st.spinner("Scarico i prezzi da Yahoo Finance..."):
+        res = aggiorna_storico(progress_cb=_cb)
+
+    barra.empty()
+
+    # Invalida la cache delle viste di rendimento: verranno ricaricate al rerun
+    for chiave in ("rendimento_mensile", "rendimento_cumulato", "rendimento_annuo"):
+        st.session_state.pop(chiave, None)
+
+    if res["ko"] == 0:
+        st.success(f"✅ Storico aggiornato: {res['ok']}/{res['totale']} ticker.")
+    else:
+        st.warning(
+            f"⚠️ Aggiornamento parziale: {res['ok']} ok, {res['ko']} falliti "
+            f"su {res['totale']}."
+        )
+    st.rerun()
+
+
 def render_rendimento_annuo():
     st.header("📈 Performance Portafoglio")
+
+    col_titolo, col_btn = st.columns([3, 1])
+    with col_btn:
+        if st.button("🔄 Aggiorna storico prezzi", use_container_width=True,
+                     help="Scarica da Yahoo Finance lo storico prezzi aggiornato "
+                          "per gli ETF in portafoglio e ricalcola i rendimenti."):
+            _aggiorna_storico_prezzi_ui()
 
     df_mensile_raw = _carica_rendimento_mensile()
     if not df_mensile_raw:

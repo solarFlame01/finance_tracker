@@ -203,16 +203,25 @@ def get_portfolio_kpi_etf():
 def get_rendimento_annuo():
     """
     Recupera i dati di rendimento annuo dal database Supabase.
-    
+
+    Usa la vista v_portafoglio_rendimento_annuo_twr, che calcola il rendimento
+    annuale componendo i rendimenti mensili time-weighted (coerente con il
+    grafico Performance). In fallback usa la vecchia vista annuale.
+
     Ritorna:
         list: Lista di dizionari contenenti i dati di rendimento annuo
     """
     try:
-        response = supabase.table("v_portafoglio_rendimento_annuo").select("*").execute()
+        response = supabase.table("v_portafoglio_rendimento_annuo_twr").select("*").execute()
         return response.data
     except Exception as e:
-        logging.error(f"Errore durante il recupero del rendimento annuo: {e}")
-        return []
+        logging.error(f"Errore durante il recupero del rendimento annuo (twr): {e}")
+        try:
+            response = supabase.table("v_portafoglio_rendimento_annuo").select("*").execute()
+            return response.data
+        except Exception as e2:
+            logging.error(f"Errore durante il recupero del rendimento annuo (fallback): {e2}")
+            return []
     
 def get_rendimento_mensile():
     """
