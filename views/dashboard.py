@@ -121,8 +121,8 @@ def render_riepilogo_portafoglio():
             st.metric("Investito", f"€ {etf_inv:,.2f}")
         with e2:
             st.metric("Rendimento", f"{float(etf_rend):.2f}%" if etf_rend is not None else "n/d")
-            n_etf = len([r for r in (st.session_state.get('kpi_etf') or [])])
-            st.metric("Posizioni", f"{n_etf}")
+            color_etf = "🟢" if etf_gain >= 0 else "🔴"
+            st.metric(f"{color_etf} Guadagno/Perdita", f"€ {etf_gain:,.2f}")
 
     with col_bond:
         st.markdown("<div class='subsection-title'>🏦 Obbligazioni</div>", unsafe_allow_html=True)
