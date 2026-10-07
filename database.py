@@ -223,6 +223,101 @@ def get_rendimento_annuo():
             logging.error(f"Errore durante il recupero del rendimento annuo (fallback): {e2}")
             return []
     
+def insert_bond_coupons(coupons):
+    """
+    Inserisce (upsert idempotente) le cedole obbligazionarie nella tabella
+    bond_coupons.
+
+    Parametri:
+        coupons (list[dict]): ogni dict con chiavi:
+            ticker, isin, descrizione, data_operazione (ISO str),
+            data_valuta (ISO str | None), importo_lordo_eur, ritenuta_eur,
+            importo_netto_eur, protocollo_cedola (str), protocollo_ritenuta (str|None)
+
+    L'upsert usa protocollo_cedola come chiave di conflitto: ricaricare lo
+    stesso file non crea duplicati.
+
+    Ritorna:
+        response | None
+    """
+    if not coupons:
+        return None
+    try:
+        response = supabase.table("bond_coupons").upsert(
+            coupons,
+            on_conflict="protocollo_cedola",
+            ignore_duplicates=False,
+        ).execute()
+        logging.info(f"Inserite/aggiornate {len(coupons)} cedole obbligazionarie.")
+        return response
+    except Exception as e:
+        logging.error(f"Errore durante l'inserimento delle cedole: {e}")
+        return None
+
+
+def get_bond_coupons():
+    """
+    Recupera tutte le cedole obbligazionarie incassate dalla tabella bond_coupons.
+
+    Ritorna:
+        list: Lista di dizionari con le cedole
+    """
+    try:
+        response = (
+            supabase.table("bond_coupons")
+            .select("*")
+            .order("data_operazione", desc=True)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero delle cedole: {e}")
+        return []
+
+
+def get_portfolio_overview():
+    """
+    Recupera il riepilogo complessivo del portafoglio (ETF + Obbligazioni)
+    dalla vista v_portfolio_overview.
+
+    Ogni riga: asset_class, investito_eur, valore_attuale_eur, guadagno_eur,
+    rendimento_pct. I bond sono valorizzati al costo (nessun prezzo live).
+
+    Ritorna:
+        list: Lista di dizionari con il riepilogo per asset class
+    """
+    try:
+        response = supabase.table("v_portfolio_overview").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dell'overview portafoglio: {e}")
+        return []
+
+
+def get_bond_summary():
+    """
+    Recupera il riepilogo per singola obbligazione dalla vista v_bond_summary.
+
+    Ogni riga: ticker, isin, descrizione, prima_data_acquisto, nominale_totale,
+    capitale_investito_eur, tasso_cedolare_pct, giorni_detenzione,
+    cedola_annua_attesa_eur, cedole_maturate_stimate_eur, cedole_incassate_eur.
+
+    Nota: le cedole maturate sono una STIMA per i BTP a tasso fisso
+    (nominale * tasso * giorni/365); per i titoli indicizzati i campi cedolari
+    sono None. Le cedole incassate reali sono 0 finche' non vengono registrate
+    transazioni di tipo cedola.
+
+    Ritorna:
+        list: Lista di dizionari con il riepilogo per obbligazione
+    """
+    try:
+        response = supabase.table("v_bond_summary").select("*").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del riepilogo bond: {e}")
+        return []
+
+
 def get_rendimento_mensile():
     """
     Recupera il rendimento mensile (time-weighted) del portafoglio dalla vista

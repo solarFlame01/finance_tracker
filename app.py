@@ -212,6 +212,18 @@ if 'rendimento_annuo' not in st.session_state:
     from database import get_rendimento_annuo
     st.session_state.rendimento_annuo = get_rendimento_annuo()
 
+if 'portfolio_overview' not in st.session_state:
+    from database import get_portfolio_overview
+    st.session_state.portfolio_overview = get_portfolio_overview()
+
+if 'bond_summary' not in st.session_state:
+    from database import get_bond_summary
+    st.session_state.bond_summary = get_bond_summary()
+
+if 'bond_coupons' not in st.session_state:
+    from database import get_bond_coupons
+    st.session_state.bond_coupons = get_bond_coupons()
+
 if 'rendimento_mensile' not in st.session_state:
     from database import get_rendimento_mensile
     st.session_state.rendimento_mensile = get_rendimento_mensile()

@@ -38,12 +38,30 @@ def render_impostazioni():
                     duplicati_rimossi = righe_iniziali - len(df_directa)
                     if duplicati_rimossi > 0:
                         st.warning(f"⚠️ Rimosse {duplicati_rimossi} righe duplicate")
+
+                    # Estrai le cedole obbligazionarie PRIMA di scartare le righe
+                    # non-acquisto in handle_sell_data.
+                    from utils import extract_bond_coupons
+                    from database import insert_bond_coupons, insert_directa_transaction
+
+                    cedole = extract_bond_coupons(df_directa)
+
                     df_directa, sell = handle_sell_data(df_directa)
-                    from database import insert_directa_transaction  # Importa la funzione dal modulo database
 
                     with st.spinner("⏳ Caricamento dati in corso..."):
                         insert_directa_transaction(df_directa.to_dict('records'))
+                        if cedole:
+                            insert_bond_coupons(cedole)
+                            # Invalida cache per ricaricare i dati aggiornati
+                            st.session_state.pop("bond_coupons", None)
+                            st.session_state.pop("bond_summary", None)
+                            st.session_state.pop("portfolio_overview", None)
+
                     st.success(f"✅ File caricato: {uploaded_directa.name}")
+                    if cedole:
+                        tot_netto = sum(c["importo_netto_eur"] for c in cedole)
+                        st.info(f"💶 Estratte {len(cedole)} cedole obbligazionarie "
+                                f"(netto totale € {tot_netto:,.2f}).")
                     st.write("**Anteprima dati (prime 5 righe):**")
                     st.dataframe(df_directa.head(), width='stretch')
                         

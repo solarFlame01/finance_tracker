@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
 from datetime import date, datetime
 from database import supabase  # Importa il tuo client supabase
 
@@ -21,31 +22,99 @@ def insert_transaction(data: dict):
         return False, f"Errore durante l'inserimento: {str(e)}"
 
 
+def _carica_cedole():
+    """Carica lo storico cedole da bond_coupons (con cache in session_state)."""
+    dati = st.session_state.get("bond_coupons")
+    if dati:
+        return dati
+    try:
+        from database import get_bond_coupons
+        dati = get_bond_coupons()
+        st.session_state.bond_coupons = dati
+        return dati
+    except Exception:
+        return []
+
+
+def render_storico_cedole():
+    """Sezione: storico cronologico delle cedole obbligazionarie incassate."""
+    st.markdown("<div class='section-title'>💰 Storico Cedole Incassate</div>", unsafe_allow_html=True)
+
+    cedole = _carica_cedole()
+    if not cedole:
+        st.info("Nessuna cedola registrata. Carica un file Directa dalla sezione "
+                "Impostazioni per popolare automaticamente lo storico cedole.")
+        return
+
+    df = pd.DataFrame(cedole)
+    for col in ["importo_lordo_eur", "ritenuta_eur", "importo_netto_eur"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    if "data_operazione" in df.columns:
+        df["data_operazione"] = pd.to_datetime(df["data_operazione"], errors="coerce")
+
+    tot_lordo = float(df["importo_lordo_eur"].sum()) if "importo_lordo_eur" in df else 0.0
+    tot_rit = float(df["ritenuta_eur"].sum()) if "ritenuta_eur" in df else 0.0
+    tot_netto = float(df["importo_netto_eur"].sum()) if "importo_netto_eur" in df else 0.0
+    n_cedole = len(df)
+    n_titoli = df["isin"].nunique() if "isin" in df else 0
+
+    # KPI riepilogativi
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.metric("💶 Totale Netto", f"€ {tot_netto:,.2f}")
+    with k2:
+        st.metric("Totale Lordo", f"€ {tot_lordo:,.2f}")
+    with k3:
+        st.metric("Ritenute", f"€ {tot_rit:,.2f}")
+    with k4:
+        st.metric("N° Cedole", f"{n_cedole}", delta=f"{n_titoli} titoli", delta_color="off")
+
+    # Grafico: cedole nette per anno
+    if "data_operazione" in df.columns and df["data_operazione"].notna().any():
+        df_anno = df.dropna(subset=["data_operazione"]).copy()
+        df_anno["anno"] = df_anno["data_operazione"].dt.year
+        per_anno = df_anno.groupby("anno")["importo_netto_eur"].sum().reset_index()
+        fig = go.Figure(go.Bar(
+            x=per_anno["anno"].astype(int).astype(str),
+            y=per_anno["importo_netto_eur"],
+            marker=dict(color="#2ca02c"),
+            text=[f"€ {v:,.2f}" for v in per_anno["importo_netto_eur"]],
+            textposition="outside",
+            hovertemplate="<b>%{x}</b><br>Netto: € %{y:,.2f}<extra></extra>",
+        ))
+        fig.update_layout(
+            height=300, template="plotly_white",
+            yaxis=dict(tickprefix="€ "), showlegend=False,
+            margin=dict(t=20, b=30, l=60, r=20),
+            title="Cedole nette per anno",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Tabella cronologica dettagliata
+    df_show = df.sort_values("data_operazione", ascending=False)
+    cols = [c for c in ["data_operazione", "ticker", "descrizione",
+                        "importo_lordo_eur", "ritenuta_eur", "importo_netto_eur"]
+            if c in df_show.columns]
+    st.dataframe(
+        df_show[cols],
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "data_operazione": st.column_config.DateColumn("Data", format="DD/MM/YYYY"),
+            "ticker": st.column_config.TextColumn("Ticker"),
+            "descrizione": st.column_config.TextColumn("Titolo"),
+            "importo_lordo_eur": st.column_config.NumberColumn("Lordo €", format="€ %.2f"),
+            "ritenuta_eur": st.column_config.NumberColumn("Ritenuta €", format="€ %.2f"),
+            "importo_netto_eur": st.column_config.NumberColumn("Netto €", format="€ %.2f"),
+        },
+    )
+
+
 def render_bond_tracker():
     st.markdown("<h1 style='text-align: center; margin-bottom: 30px;'>Bond Tracker</h1>", unsafe_allow_html=True)
 
-    # Prima tabella: Guadagno netto da cedole
-    st.markdown("<div class='section-title'>💰 Guadagno netto da cedole</div>", unsafe_allow_html=True)
-    
-    if 'rendimento_cedole' in st.session_state and st.session_state.rendimento_cedole:
-        df_cedole = pd.DataFrame(st.session_state.rendimento_cedole)
-        
-        st.dataframe(
-            df_cedole,
-            column_config={
-                "sum": st.column_config.NumberColumn(
-                    "Guadagno netto da cedole",
-                    format="€ %.2f"
-                ),
-                "descrizione": st.column_config.TextColumn(
-                    "Descrizione Bond"
-                )
-            },
-            hide_index=True,
-            use_container_width=True
-        )
-    else:
-        st.info("Nessun dato disponibile per le cedole")
+    render_storico_cedole()
     
     # Seconda tabella: Transazioni Bond
     st.markdown("<div class='section-title'>📊 Transazioni</div>", unsafe_allow_html=True)
