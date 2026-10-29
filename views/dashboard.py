@@ -180,7 +180,7 @@ def render_dashboard():
 
     if st.session_state.etf_transactions:
         # Tab per organizzare le sezioni
-        tab1, tab2, tab5,tab8, tab7, tab9, tab6, tab4  = st.tabs(["📈 Riepilogo", "📊 Analisi","🎯 Metriche","🏦 Bond Tracker", "🏆 Rendimento annuo", "💼 Prossimo PAC","➕ Inserisci Transazione", "⚙️ Impostazioni" ])
+        tab1, tab2, tab5, tab10, tab8, tab7, tab9, tab6, tab4  = st.tabs(["📈 Riepilogo", "📊 Analisi","🎯 Metriche","🔮 Proiezioni future","🏦 Bond Tracker", "🏆 Rendimento annuo", "💼 Prossimo PAC","➕ Inserisci Transazione", "⚙️ Impostazioni" ])
         
         # ===== TAB 1: RIEPILOGO =====
         with tab1:
@@ -429,6 +429,10 @@ def render_dashboard():
         with tab5:
             from views.metriche import render_metriche
             render_metriche()
+        # ==== TAB PROIEZIONI FUTURE ====
+        with tab10:
+            from views.proiezioni_future import render_proiezioni_future
+            render_proiezioni_future()
         # ==== TAB INSERISCI TRANSAZIONE ====
         with tab6:
             from views.gestione_eft import render_gestione_etf
