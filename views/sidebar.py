@@ -1,5 +1,21 @@
 import streamlit as st
 
+# Mapping etichetta -> chiave di pagina per il menu di navigazione.
+# Le chiavi di routing coincidono con quelle usate in app.py; "gestione_spese"
+# è la nuova voce. NON modificare le stringhe di routing esistenti.
+PAGINE = {
+    "📊 Dashboard": "dashboard",
+    "💼 Gestione ETF": "gestione_etf",
+    "📈 Metriche": "metriche",
+    "📅 Rendimento Annuo": "rendimento_annuo",
+    "🧮 Simula ETF": "simula_etf",
+    "🎯 Prossimo PAC": "prossimo_pac",
+    "🔮 Proiezioni Future": "proiezioni_future",
+    "⚙️ Impostazioni": "impostazioni",
+    "💶 Gestione Spese": "gestione_spese",
+}
+
+
 def render_sidebar():
     with st.sidebar:
         # Header
@@ -9,9 +25,39 @@ def render_sidebar():
             <p style='margin: 5px 0; color: #888; font-size: 12px;'>Gestione Intelligente del Portafoglio</p>
         </div>
         """, unsafe_allow_html=True)
-        
+
         st.divider()
-        
+
+        # ===== Menu di navigazione =====
+        # Default "dashboard" se la pagina corrente non è inizializzata.
+        if "page" not in st.session_state:
+            st.session_state.page = "dashboard"
+
+        etichette = list(PAGINE.keys())
+        chiavi = list(PAGINE.values())
+
+        # Sincronizza l'indice corrente con st.session_state.page.
+        pagina_corrente = st.session_state.page
+        if pagina_corrente in chiavi:
+            indice_corrente = chiavi.index(pagina_corrente)
+        else:
+            indice_corrente = chiavi.index("dashboard")
+
+        etichetta_selezionata = st.radio(
+            "Navigazione",
+            etichette,
+            index=indice_corrente,
+            label_visibility="collapsed",
+            key="menu_navigazione",
+        )
+
+        pagina_selezionata = PAGINE[etichetta_selezionata]
+        if pagina_selezionata != st.session_state.page:
+            st.session_state.page = pagina_selezionata
+            st.rerun()
+
+        st.divider()
+
         # Sezione Guida Rapida
         st.markdown("""
         <h3 style='font-size: 14px; color: #1f77b4; margin-top: 20px; margin-bottom: 10px;'>

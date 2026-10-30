@@ -1,0 +1,1219 @@
+{
+  "pbtResults": {
+    "4.3 Property test: normalizzazione deterministica e idempotente": {
+      "status": "passed",
+      "lastRunTimestamp": 1793390781426
+    },
+    "4.4 Property test: chiave non calcolabile implica scarto": {
+      "status": "passed",
+      "lastRunTimestamp": 1793390883157
+    },
+    "5.5 Property test: saldo conto uguale alla somma dei movimenti": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391301874
+    },
+    "5.6 Property test: ordinamento per data decrescente": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391443239
+    },
+    "5.7 Property test: correttezza dei filtri dell'elenco": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391471251
+    },
+    "5.8 Property test: esclusione dei trasferimenti dai totali": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391649515
+    },
+    "6.4 Property test: esercente non mappato resta da categorizzare": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391659109
+    },
+    "5.9 Property test: rilevamento delle coppie di trasferimento": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391661841
+    },
+    "7.5 Property test: rilevamento delle colonne mancanti": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391787597
+    },
+    "5.10 Property test: conservazione dei conteggi di riconciliazione": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391788496
+    },
+    "8.6 Property test: mappatura segno → tipo movimento": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391865091
+    },
+    "8.5 Property test: rilevamento del formato banca": {
+      "status": "passed",
+      "lastRunTimestamp": 1793391896569
+    },
+    "10.5 Property test: dedup idempotente sulla chiave naturale (con Supabase mockato)": {
+      "status": "passed",
+      "lastRunTimestamp": 1793392114073
+    },
+    "12.6 Property test: coppia di trasferimento speculare": {
+      "status": "passed",
+      "lastRunTimestamp": 1793392817171
+    },
+    "12.8 Property test: validazione dell'upload PDF": {
+      "status": "passed",
+      "lastRunTimestamp": 1793392817582
+    }
+  },
+  "executionHistory": {
+    "1.1 Aggiungere le dipendenze a `requirements.txt`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390184025
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390200021
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390264118
+      }
+    ],
+    "1.2 Creare lo scheletro del package di dominio `spese/`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390184283
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390200121
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390264305
+      }
+    ],
+    "2.1 Migrazione tabella `conti`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390184550
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390268828
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390309713
+      }
+    ],
+    "2.2 Migrazione tabella `categorie`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390184834
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390269010
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390309919
+      }
+    ],
+    "2.3 Migrazione tabella `sotto_categorie`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185066
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390315953
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390375584
+      }
+    ],
+    "2.4 Migrazione tabella `movimenti`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185263
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390316281
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390375924
+      }
+    ],
+    "2.5 Migrazione tabella `mapping_esercente_categoria`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185364
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390315673
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390376230
+      }
+    ],
+    "2.6 Smoke test dello schema delle migrazioni": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185457
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390382885
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390580481
+      }
+    ],
+    "3. Checkpoint - Verificare lo schema": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185544
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393081705
+      }
+    ],
+    "4.1 Implementare `normalize_esercente(descrizione) -> str`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185636
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390383643
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390580631
+      }
+    ],
+    "4.2 Implementare `chiave_naturale_movimento(data_iso, conto, importo_eur, descrizione)`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390185831
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390384372
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390580731
+      }
+    ],
+    "4.3 Property test: normalizzazione deterministica e idempotente": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186095
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390662880
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390798610
+      }
+    ],
+    "4.4 Property test: chiave non calcolabile implica scarto": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186272
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390809779
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390918545
+      }
+    ],
+    "5.1 Implementare `saldo_conto(movimenti_conto) -> float`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186445
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390591401
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390798922
+      }
+    ],
+    "5.2 Implementare le helper pure di visualizzazione: ordinamento per data decrescente, applicazione filtri (conto, categoria, intervallo date estremi inclusi) ed esclusione trasferimenti dai totali": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186607
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390591292
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390601066
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390809546
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390918684
+      }
+    ],
+    "5.3 Implementare `rileva_coppie_trasferimento(movimenti)`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186716
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390591674
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390601223
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390924630
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391043839
+      }
+    ],
+    "5.4 Implementare `prepara_per_upsert(transazioni, conto)`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186817
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391050804
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391207503
+      }
+    ],
+    "5.5 Property test: saldo conto uguale alla somma dei movimenti": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390186957
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391219764
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391371693
+      }
+    ],
+    "5.6 Property test: ordinamento per data decrescente": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187058
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391382801
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391578776
+      }
+    ],
+    "5.7 Property test: correttezza dei filtri dell'elenco": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187188
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391383096
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391578628
+      }
+    ],
+    "5.8 Property test: esclusione dei trasferimenti dai totali": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187293
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391588708
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391706338
+      }
+    ],
+    "5.9 Property test: rilevamento delle coppie di trasferimento": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187387
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391588486
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391706674
+      }
+    ],
+    "5.10 Property test: conservazione dei conteggi di riconciliazione": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187492
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391713557
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391806451
+      }
+    ],
+    "6.1 Implementare `categorizza(movimento, mapping) -> dict`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187598
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390591567
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390798754
+      }
+    ],
+    "6.2 Implementare `aggiorna_mapping_da_correzione(esercente_norm, categoria, sotto_categoria)`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187706
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390809671
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390918219
+      }
+    ],
+    "6.3 Property test: auto-categorizzazione da mapping corrente": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187857
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391383219
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391578466
+      }
+    ],
+    "6.4 Property test: esercente non mappato resta da categorizzare": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390187959
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391588332
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391706872
+      }
+    ],
+    "7.1 Implementare `leggi_storico_excel(file)` e la validazione colonne": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188167
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390809365
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390918416
+      }
+    ],
+    "7.2 Implementare `mappa_riga_a_movimento(riga) -> dict | None`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188308
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390924791
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391044028
+      }
+    ],
+    "7.3 Implementare `importa_storico(file) -> dict`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188412
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391219196
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391371237
+      }
+    ],
+    "7.4 Property test: mappatura deterministica delle colonne storiche": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188529
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391588181
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391706986
+      }
+    ],
+    "7.5 Property test: rilevamento delle colonne mancanti": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188675
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391713716
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391806567
+      }
+    ],
+    "7.6 Unit/edge-case test dell'importatore Excel": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188793
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391713887
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391806237
+      }
+    ],
+    "8.1 Definire l'interfaccia e il modello dati di estrazione (`spese/pdf/base.py`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390188918
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390591775
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390799082
+      }
+    ],
+    "8.2 Implementare il registry dei parser (`spese/pdf/registry.py`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189022
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391219483
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391371561
+      }
+    ],
+    "8.3 Implementare almeno un parser concreto per banca e la mappatura segno → tipo": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189128
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391382613
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391578038
+      }
+    ],
+    "8.4 Property test: round-trip del parser PDF per banca": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189230
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391816070
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391925482
+      }
+    ],
+    "8.5 Property test: rilevamento del formato banca": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189339
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391816421
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391925904
+      }
+    ],
+    "8.6 Property test: mappatura segno → tipo movimento": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189454
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391816247
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391926104
+      }
+    ],
+    "8.7 Unit/edge-case test del parser PDF": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189719
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391816689
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391926302
+      }
+    ],
+    "9. Checkpoint - Verificare la logica di dominio": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390189894
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393081856
+      }
+    ],
+    "10.1 Implementare le funzioni per conti, categorie e sotto-categorie": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190006
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391219360
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391371048
+      }
+    ],
+    "10.2 Implementare le funzioni sui movimenti": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190120
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391933793
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392008562
+      }
+    ],
+    "10.3 Implementare `insert_trasferimento(...)` con compensazione": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190238
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391382944
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391578284
+      }
+    ],
+    "10.4 Implementare le funzioni sul mapping esercente→categoria": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190343
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391588012
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391706526
+      }
+    ],
+    "10.5 Property test: dedup idempotente sulla chiave naturale (con Supabase mockato)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190445
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392018186
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392162885
+      }
+    ],
+    "10.6 Property test: validazione del valore di Tipo_Movimento": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190545
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392017704
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392163091
+      }
+    ],
+    "10.7 Integration test del layer dati (1-3 esempi, Supabase mockato)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190675
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392018035
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392162542
+      }
+    ],
+    "11.1 Aggiungere il menu di navigazione reale in `views/sidebar.py`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190804
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391219638
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391371395
+      }
+    ],
+    "11.2 Aggiungere il ramo di routing in `app.py`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390190909
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391816558
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391925665
+      }
+    ],
+    "11.3 Unit test di navigazione e routing": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191043
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392018310
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392162686
+      }
+    ],
+    "12.1 Creare `render_gestione_spese` con struttura a tab e isolamento errori": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191190
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392017874
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392162314
+      }
+    ],
+    "12.2 Implementare il tab Movimenti (elenco, filtri, editing, eliminazione)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191357
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392168187
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392353444
+      }
+    ],
+    "12.3 Implementare il tab Import Excel": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191496
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392356863
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392419632
+      }
+    ],
+    "12.4 Implementare il tab Import Estratto Conto (PDF)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191635
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392422942
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392575660
+      }
+    ],
+    "12.5 Implementare il tab Trasferimenti e il tab Saldi": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191772
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392588309
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392728622
+      }
+    ],
+    "12.6 Property test: coppia di trasferimento speculare": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390191887
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392740351
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392914938
+      }
+    ],
+    "12.7 Property test: validazione della registrazione di un trasferimento": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390192027
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392740788
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392914769
+      }
+    ],
+    "12.8 Property test: validazione dell'upload PDF": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390192181
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392740574
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392914637
+      }
+    ],
+    "12.9 Unit/edge-case e smoke test della UI": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390192342
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392741260
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392914488
+      }
+    ],
+    "13.1 Collegare importatore Excel, parser PDF, categorizzatore e riconciliatore alle funzioni di `database.py` dentro `render_gestione_spese`": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390192508
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392741014
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392915054
+      }
+    ],
+    "13.2 Integration test end-to-end dei flussi con Supabase mockato": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390192631
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392918896
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393058439
+      }
+    ],
+    "14. Checkpoint finale - Verificare l'intera feature": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390192744
+      },
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393081994
+      }
+    ],
+    "2. Creare le migrazioni SQL Supabase (ordine FK: conti, categorie, sotto_categorie, movimenti, mapping)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390580853
+      }
+    ],
+    "4. Implementare la logica pura di normalizzazione e chiave naturale (`spese/normalizza.py`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793390918817
+      }
+    ],
+    "6. Implementare l'auto-categorizzatore (`spese/categorizzatore.py`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391707170
+      }
+    ],
+    "5. Implementare le helper di dominio su filtri, ordinamento, saldo ed esclusione trasferimenti (`spese/riconciliatore.py` + helper condivise)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793391806692
+      }
+    ],
+    "11. Integrare la navigazione e il routing": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793392163341
+      }
+    ],
+    "13. Wiring finale e verifica end-to-end dei componenti": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393058672
+      }
+    ],
+    "1. Preparare dipendenze e struttura dei pacchetti": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393074970
+      }
+    ],
+    "8. Implementare il parser PDF multi-banca (`spese/pdf/`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393075125
+      }
+    ],
+    "10. Implementare il layer dati in `database.py` (UPSERT idempotente, `get_secret`, sanitizzazione, try/except + logging)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393075240
+      }
+    ],
+    "7. Implementare l'importatore Excel (`spese/excel_importer.py`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393075368
+      }
+    ],
+    "12. Implementare la UI della sezione (`views/gestione_spese.py`)": [
+      {
+        "executionId": "22014951-ab8a-41dd-8346-eae288b3e4bd",
+        "chatSessionId": "sess_9dcdf550-316e-49a6-a6ff-a791f482745f",
+        "timestamp": 1793393075480
+      }
+    ]
+  }
+}

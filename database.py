@@ -760,3 +760,529 @@ def insert_transaction(
     
     response = supabase.table("transaction").insert(data).execute()
     return response
+
+# ---------------------------------------------------------------------------
+# Gestione Spese - Conti, Categorie, Sotto-Categorie
+# ---------------------------------------------------------------------------
+
+def get_conti():
+    """
+    Recupera tutti i conti dalla tabella "conti" del database Supabase.
+
+    Ritorna:
+        list: Lista di dizionari con i conti (id, nome). Lista vuota in errore.
+    """
+    try:
+        response = supabase.table("conti").select("*").order("nome").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dei conti: {e}")
+        return []
+
+
+def upsert_conto(nome):
+    """
+    Inserisce un conto nella tabella "conti" in modo idempotente.
+
+    L'upsert usa "nome" come chiave di conflitto con ignore_duplicates=True:
+    ricaricare un conto gia' esistente non crea duplicati e non genera errore.
+
+    Parametri:
+        nome (str): Nome del conto
+
+    Ritorna:
+        response | None: Risultato dell'upsert, None in caso di errore
+    """
+    try:
+        response = supabase.table("conti").upsert(
+            {"nome": nome},
+            on_conflict="nome",
+            ignore_duplicates=True,
+        ).execute()
+        return response
+    except Exception as e:
+        logging.error(f"Errore durante l'upsert del conto '{nome}': {e}")
+        return None
+
+
+def get_or_create_conto(nome):
+    """
+    Restituisce l'id del conto con il nome indicato, creandolo se non esiste.
+
+    Prima tenta un upsert idempotente (ignora i duplicati), poi legge l'id del
+    conto corrispondente al nome. Funziona sia che il conto esistesse gia' sia
+    che sia stato appena creato.
+
+    Parametri:
+        nome (str): Nome del conto
+
+    Ritorna:
+        int | None: id del conto, None in caso di errore
+    """
+    try:
+        # Crea il conto se non esiste (idempotente)
+        upsert_conto(nome)
+        response = (
+            supabase.table("conti")
+            .select("id")
+            .eq("nome", nome)
+            .limit(1)
+            .execute()
+        )
+        if response.data:
+            return response.data[0]["id"]
+        return None
+    except Exception as e:
+        logging.error(f"Errore durante get_or_create del conto '{nome}': {e}")
+        return None
+
+
+def get_categorie():
+    """
+    Recupera tutte le categorie dalla tabella "categorie" del database Supabase.
+
+    Ritorna:
+        list: Lista di dizionari con le categorie (id, nome). Lista vuota in errore.
+    """
+    try:
+        response = supabase.table("categorie").select("*").order("nome").execute()
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero delle categorie: {e}")
+        return []
+
+
+def upsert_categoria(nome):
+    """
+    Inserisce una categoria nella tabella "categorie" in modo idempotente.
+
+    L'upsert usa "nome" come chiave di conflitto con ignore_duplicates=True:
+    ricaricare una categoria gia' esistente non crea duplicati.
+
+    Parametri:
+        nome (str): Nome della categoria
+
+    Ritorna:
+        response | None: Risultato dell'upsert, None in caso di errore
+    """
+    try:
+        response = supabase.table("categorie").upsert(
+            {"nome": nome},
+            on_conflict="nome",
+            ignore_duplicates=True,
+        ).execute()
+        return response
+    except Exception as e:
+        logging.error(f"Errore durante l'upsert della categoria '{nome}': {e}")
+        return None
+
+
+def get_sotto_categorie():
+    """
+    Recupera tutte le sotto-categorie dalla tabella "sotto_categorie".
+
+    Ritorna:
+        list: Lista di dizionari con le sotto-categorie (id, categoria_id, nome).
+              Lista vuota in caso di errore.
+    """
+    try:
+        response = (
+            supabase.table("sotto_categorie")
+            .select("*")
+            .order("nome")
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero delle sotto-categorie: {e}")
+        return []
+
+
+def upsert_sotto_categoria(nome, categoria_id):
+    """
+    Inserisce una sotto-categoria nella tabella "sotto_categorie" in modo
+    idempotente.
+
+    L'upsert usa (categoria_id, nome) come chiave di conflitto con
+    ignore_duplicates=True: la stessa sotto-categoria nella stessa categoria
+    non viene duplicata.
+
+    Parametri:
+        nome (str): Nome della sotto-categoria
+        categoria_id (int): id della categoria di appartenenza
+
+    Ritorna:
+        response | None: Risultato dell'upsert, None in caso di errore
+    """
+    try:
+        response = supabase.table("sotto_categorie").upsert(
+            {"nome": nome, "categoria_id": categoria_id},
+            on_conflict="categoria_id, nome",
+            ignore_duplicates=True,
+        ).execute()
+        return response
+    except Exception as e:
+        logging.error(
+            f"Errore durante l'upsert della sotto-categoria '{nome}' "
+            f"(categoria_id={categoria_id}): {e}"
+        )
+        return None
+
+
+def insert_trasferimento(conto_origine_id, conto_dest_id, importo_eur, data_iso, nota=None):
+    """
+    Registra un Trasferimento tra due Conti inserendo due Movimenti speculari
+    in modo atomico tramite compensazione applicativa (Req 7.1, 7.2).
+
+    Crea due righe nella tabella "movimenti" con pari importo (assoluto) e pari
+    data valuta:
+      - "Trasferimento uscita" sul Conto di origine (importo negativo)
+      - "Trasferimento ingresso" sul Conto di destinazione (importo positivo)
+
+    Supabase/PostgREST non espone transazioni multi-statement lato client,
+    quindi l'atomicita' e' garantita per compensazione: se l'inserimento del
+    secondo Movimento fallisce, il primo (gia' inserito) viene rimosso, in modo
+    da non lasciare meta' Trasferimento ne' alterare i saldi dei Conti (Req 7.2).
+
+    Parametri:
+        conto_origine_id (int): id del Conto di origine (lato "uscita")
+        conto_dest_id (int): id del Conto di destinazione (lato "ingresso")
+        importo_eur (float): importo del Trasferimento (verra' usato in valore
+            assoluto: negativo in uscita, positivo in ingresso)
+        data_iso (str): data valuta in formato ISO (YYYY-MM-DD), uguale per
+            entrambi i Movimenti
+        nota (str | None): nota opzionale associata al Trasferimento
+
+    Ritorna:
+        response | None: risultato dell'inserimento del secondo Movimento in
+            caso di successo, None in caso di errore (con compensazione gia'
+            eseguita sul primo Movimento).
+    """
+    importo = abs(importo_eur)
+    descr = (nota or "").strip() or "Trasferimento tra conti"
+    descr_norm = descr.upper()
+
+    movimento_uscita = {
+        "data_movimento": data_iso,
+        "conto_id": conto_origine_id,
+        "importo_eur": -importo,
+        "tipo_movimento": "Trasferimento uscita",
+        "valuta": "EUR",
+        "nota": nota,
+        "descrizione": descr,
+        "descrizione_normalizzata": descr_norm,
+    }
+    movimento_ingresso = {
+        "data_movimento": data_iso,
+        "conto_id": conto_dest_id,
+        "importo_eur": importo,
+        "tipo_movimento": "Trasferimento ingresso",
+        "valuta": "EUR",
+        "nota": nota,
+        "descrizione": descr,
+        "descrizione_normalizzata": descr_norm,
+    }
+
+    # 1) Inserisci il lato "uscita" sul conto di origine
+    try:
+        res_uscita = supabase.table("movimenti").insert(movimento_uscita).execute()
+    except Exception as e:
+        logging.error(
+            f"Errore durante l'inserimento del lato uscita del trasferimento "
+            f"(conto_origine_id={conto_origine_id}): {e}"
+        )
+        return None
+
+    # 2) Inserisci il lato "ingresso" sul conto di destinazione; in caso di
+    #    fallimento, compensa rimuovendo il lato uscita gia' inserito.
+    try:
+        res_ingresso = supabase.table("movimenti").insert(movimento_ingresso).execute()
+        return res_ingresso
+    except Exception as e:
+        logging.error(
+            f"Errore durante l'inserimento del lato ingresso del trasferimento "
+            f"(conto_dest_id={conto_dest_id}): {e}. Avvio compensazione del "
+            f"lato uscita gia' inserito."
+        )
+        # Compensazione: elimina il movimento di uscita appena creato
+        try:
+            inserted = getattr(res_uscita, "data", None) or []
+            for riga in inserted:
+                movimento_id = riga.get("id")
+                if movimento_id is not None:
+                    supabase.table("movimenti").delete().eq("id", movimento_id).execute()
+            logging.info(
+                "Compensazione completata: lato uscita del trasferimento rimosso."
+            )
+        except Exception as e2:
+            logging.error(
+                f"Errore durante la compensazione del lato uscita del "
+                f"trasferimento: {e2}. Possibile Movimento orfano da verificare."
+            )
+        return None
+
+# ---------------------------------------------------------------------------
+# Gestione Spese - Mapping Esercente -> Categoria
+# ---------------------------------------------------------------------------
+
+def get_mapping_esercente():
+    """
+    Recupera tutte le voci del Mapping_Esercente_Categoria dalla tabella
+    "mapping_esercente_categoria" del database Supabase (Req 6.1, 9.1).
+
+    Ogni riga: id, esercente_normalizzato, categoria_id, sotto_categoria_id.
+    L'Auto_Categorizzatore usa queste voci per assegnare Categoria (e
+    Sotto_Categoria) di default ai Movimenti in base all'Esercente normalizzato.
+
+    Ritorna:
+        list: Lista di dizionari con le voci di mapping. Lista vuota in errore.
+    """
+    try:
+        response = (
+            supabase.table("mapping_esercente_categoria")
+            .select("*")
+            .order("esercente_normalizzato")
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero del mapping esercente->categoria: {e}")
+        return []
+
+
+def upsert_mapping_esercente(esercente_norm, categoria_id, sotto_categoria_id):
+    """
+    Inserisce o aggiorna una voce del Mapping_Esercente_Categoria nella tabella
+    "mapping_esercente_categoria" (Req 6.5, 6.6).
+
+    L'upsert usa "esercente_normalizzato" come chiave di conflitto con
+    ignore_duplicates=False: a differenza degli altri upsert idempotenti, qui
+    in caso di conflitto la riga esistente VIENE aggiornata con la nuova
+    Categoria e Sotto_Categoria. Questo copre sia la creazione di una nuova voce
+    per un Esercente non ancora mappato (Req 6.5) sia la correzione di una voce
+    gia' esistente (Req 6.6).
+
+    Parametri:
+        esercente_norm (str): Esercente normalizzato, chiave del mapping
+        categoria_id (int): id della Categoria di default (obbligatoria)
+        sotto_categoria_id (int | None): id della Sotto_Categoria di default
+            (facoltativa, None se non presente)
+
+    Ritorna:
+        response | None: Risultato dell'upsert, None in caso di errore
+    """
+    try:
+        response = supabase.table("mapping_esercente_categoria").upsert(
+            {
+                "esercente_normalizzato": esercente_norm,
+                "categoria_id": categoria_id,
+                "sotto_categoria_id": sotto_categoria_id,
+            },
+            on_conflict="esercente_normalizzato",
+            ignore_duplicates=False,
+        ).execute()
+        return response
+    except Exception as e:
+        logging.error(
+            f"Errore durante l'upsert del mapping esercente '{esercente_norm}' "
+            f"(categoria_id={categoria_id}, sotto_categoria_id={sotto_categoria_id}): {e}"
+        )
+        return None
+
+# ---------------------------------------------------------------------------
+# Gestione Spese - Movimenti (CRUD + UPSERT idempotente)
+# ---------------------------------------------------------------------------
+
+def get_movimenti(conto=None, categoria=None, data_da=None, data_a=None):
+    """
+    Recupera i Movimenti dalla tabella "movimenti" con filtri opzionali,
+    ordinati per data_movimento decrescente, con paginazione a pagine di 1000
+    righe come get_etf_history (Req 8.1, 8.3, 8.4, 8.5).
+
+    I filtri "conto" e "categoria" possono essere passati sia come id numerico
+    sia come nome: in quest'ultimo caso il nome viene risolto nell'id
+    corrispondente tramite le tabelle "conti" / "categorie" prima di applicare
+    il filtro su conto_id / categoria_id. Se un nome non viene risolto, il
+    relativo filtro produce un elenco vuoto (nessun movimento corrispondente).
+
+    Parametri:
+        conto (int | str | None): id o nome del Conto per cui filtrare (Req 8.3)
+        categoria (int | str | None): id o nome della Categoria (Req 8.4)
+        data_da (str | None): data iniziale inclusa, ISO YYYY-MM-DD (Req 8.5)
+        data_a (str | None): data finale inclusa, ISO YYYY-MM-DD (Req 8.5)
+
+    Ritorna:
+        list: Lista di dizionari con i movimenti. Lista vuota in caso di errore
+              o se nessun movimento soddisfa i filtri.
+    """
+    try:
+        def _risolvi_id(valore, tabella):
+            """Restituisce l'id: se valore e' gia' numerico lo usa, altrimenti
+            lo cerca per nome nella tabella indicata. None se non risolvibile."""
+            if valore is None:
+                return None
+            if isinstance(valore, int):
+                return valore
+            if isinstance(valore, str) and valore.isdigit():
+                return int(valore)
+            # Risoluzione per nome
+            res = (
+                supabase.table(tabella)
+                .select("id")
+                .eq("nome", valore)
+                .limit(1)
+                .execute()
+            )
+            if res.data:
+                return res.data[0]["id"]
+            return None
+
+        conto_id = None
+        if conto is not None:
+            conto_id = _risolvi_id(conto, "conti")
+            if conto_id is None:
+                # Nome conto non trovato: nessun movimento corrispondente
+                return []
+
+        categoria_id = None
+        if categoria is not None:
+            categoria_id = _risolvi_id(categoria, "categorie")
+            if categoria_id is None:
+                # Nome categoria non trovato: nessun movimento corrispondente
+                return []
+
+        all_data = []
+        page_size = 1000
+        start = 0
+
+        while True:
+            query = supabase.table("movimenti").select("*")
+
+            if conto_id is not None:
+                query = query.eq("conto_id", conto_id)
+            if categoria_id is not None:
+                query = query.eq("categoria_id", categoria_id)
+            if data_da is not None:
+                query = query.gte("data_movimento", data_da)
+            if data_a is not None:
+                query = query.lte("data_movimento", data_a)
+
+            response = (
+                query.order("data_movimento", desc=True)
+                .range(start, start + page_size - 1)
+                .execute()
+            )
+            all_data.extend(response.data)
+
+            if len(response.data) < page_size:
+                break
+
+            start += page_size
+
+        return all_data
+    except Exception as e:
+        logging.error(f"Errore durante il recupero dei movimenti: {e}")
+        return []
+
+
+def upsert_movimenti(movimenti):
+    """
+    Inserisce (UPSERT idempotente) una lista di Movimenti nella tabella
+    "movimenti" (Req 3.7, 3.8, 5.1, 5.2, 5.4).
+
+    L'upsert usa la Chiave_Naturale_Movimento come chiave di conflitto
+    (data_movimento, conto_id, importo_eur, descrizione_normalizzata) con
+    ignore_duplicates=True: ricaricare gli stessi movimenti non crea duplicati
+    e non altera i record gia' presenti. Prima dell'upsert ogni record viene
+    sanitizzato con make_json_serializable, che converte i Timestamp pandas in
+    stringhe ISO e i valori NaN in None, in modo da ottenere payload
+    JSON-serializzabili (coerente con insert_directa_transaction).
+
+    Parametri:
+        movimenti (list[dict]): Lista di record movimento da salvare.
+
+    Ritorna:
+        response | None: Risultato dell'upsert, None in caso di errore o se la
+                         lista e' vuota.
+    """
+    if not movimenti:
+        return None
+    try:
+        import math
+
+        def make_json_serializable(obj):
+            """Converte ricorsivamente tipi non-JSON-serializable in tipi nativi Python."""
+            if isinstance(obj, pd.Timestamp):
+                return obj.isoformat() if not pd.isna(obj) else None
+            if isinstance(obj, float) and math.isnan(obj):
+                return None
+            return obj
+
+        # Sanitizza ogni record prima dell'upsert
+        batch_data = [
+            {k: make_json_serializable(v) for k, v in record.items()}
+            for record in movimenti
+        ]
+
+        response = supabase.table("movimenti").upsert(
+            batch_data,
+            on_conflict="data_movimento, conto_id, importo_eur, descrizione_normalizzata",
+            ignore_duplicates=True,
+        ).execute()
+        logging.info(f"Upsert di {len(batch_data)} movimenti completato.")
+        return response
+    except Exception as e:
+        logging.error(f"Errore durante l'upsert dei movimenti: {e}")
+        return None
+
+
+def update_movimento(movimento_id, campi):
+    """
+    Aggiorna i campi indicati di un Movimento esistente, identificato dall'id
+    (Req 8.8).
+
+    Parametri:
+        movimento_id (int): id del Movimento da aggiornare
+        campi (dict): Dizionario dei campi da aggiornare con i nuovi valori
+
+    Ritorna:
+        response | None: Risultato dell'update, None in caso di errore.
+    """
+    try:
+        response = (
+            supabase.table("movimenti")
+            .update(campi)
+            .eq("id", movimento_id)
+            .execute()
+        )
+        return response
+    except Exception as e:
+        logging.error(
+            f"Errore durante l'aggiornamento del movimento id={movimento_id}: {e}"
+        )
+        return None
+
+
+def delete_movimento(movimento_id):
+    """
+    Elimina un Movimento esistente, identificato dall'id (Req 8.10).
+
+    Parametri:
+        movimento_id (int): id del Movimento da eliminare
+
+    Ritorna:
+        response | None: Risultato della delete, None in caso di errore.
+    """
+    try:
+        response = (
+            supabase.table("movimenti")
+            .delete()
+            .eq("id", movimento_id)
+            .execute()
+        )
+        return response
+    except Exception as e:
+        logging.error(
+            f"Errore durante l'eliminazione del movimento id={movimento_id}: {e}"
+        )
+        return None

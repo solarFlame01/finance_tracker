@@ -7,3 +7,5 @@ python-dotenv
 unidecode
 yfinance
 numpy
+pdfplumber
+hypothesis

@@ -16,6 +16,7 @@ from views.impostazioni import render_impostazioni
 from views.simula_eft import render_simula_etf
 from views.prossimo_pac import render_prossimo_pac
 from views.proiezioni_future import render_proiezioni_future
+from views.gestione_spese import render_gestione_spese
 from views.sidebar import render_sidebar
 import logging, sys
 # ===== CONFIGURAZIONE LOGGING (PRIMA DI TUTTO) =====
@@ -259,6 +260,8 @@ def main():
         render_prossimo_pac()
     elif st.session_state.page == "proiezioni_future":
         render_proiezioni_future()
+    elif st.session_state.page == "gestione_spese":
+        render_gestione_spese()
         
     # Footer
     st.divider()
